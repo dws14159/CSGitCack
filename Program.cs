@@ -10,7 +10,16 @@ namespace CSGitCack
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello Git!");
+            test1();
+        }
+
+        private static void test1()
+        {
+            string DlgText = "+237 ";
+            int num;
+            int.TryParse(DlgText, out num);
+            string TestNum = num.ToString();
+            Console.WriteLine($"DlgText=#{DlgText}#; TestNum=#{TestNum}#");
         }
     }
 }
