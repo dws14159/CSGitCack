@@ -16,7 +16,17 @@ namespace CSGitCack
     {
         static void Main(string[] args)
         {
-            test2();
+            test3();
+        }
+
+        private static void test3()
+        {
+            string teststr = "";
+            for (int i = 129; i <= 255; i++)
+            {
+                teststr += Convert.ToChar(i);
+            }
+            Console.WriteLine(teststr);
         }
 
         private static void test2()
