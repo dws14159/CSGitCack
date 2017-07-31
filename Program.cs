@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,13 +18,15 @@ namespace CSGitCack
             test1();
         }
 
-        private static void test1()
+        private static void test1([CallerMemberName] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             string DlgText = "+237 ";
             int num;
             int.TryParse(DlgText, out num);
             string TestNum = num.ToString();
             Console.WriteLine($"DlgText=#{DlgText}#; TestNum=#{TestNum}#");
+            Console.WriteLine($"DlgText=#{DlgText}#; TestNum=#{TestNum}#");
+            Console.WriteLine($"CalledBy={filePath} at line {lineNumber}");
         }
     }
 }
