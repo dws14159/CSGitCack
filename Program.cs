@@ -16,7 +16,59 @@ namespace CSGitCack
     {
         static void Main(string[] args)
         {
-            test3();
+            //foreach (string s in args)
+            //{
+            //    Console.WriteLine($"Argument: '{s}'");
+            //}
+
+            test4();
+        }
+
+        private static void test4()
+        {
+            Random r = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
+            string[] Layouts = {"AA11 AAA","B111 AAA","B11 AAA","B2 AAA","AAA 2B","AAA 11B","AAA 211B","2111 AA","2111B",
+                    "2B","2AA","2AAA","21B","21AA","21AAA","211B","211 AA","211 AAA","B111","AA 111","AAA 111",
+                    "B11","AA11","AAA 111","B2","B11","B111","B1111","AA 1111","AAA 1111","2111 AAA"};
+            string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            string charsNoOIZU = "ABCDEFGHJKLMNPQRSTVWXY";
+            string digits = "0123456789";
+            string digitsNo01 = "23456789";
+            string newplates = "";
+
+            for (int i = 0; i < 50; i++)
+            {
+                string layout = Layouts[r.Next(Layouts.Length)];
+
+                foreach (char c in layout)
+                {
+                    switch (c)
+                    {
+                        case 'A':
+                            newplates += chars[r.Next(chars.Length)];
+                            break;
+
+                        case 'B':
+                            newplates += charsNoOIZU[r.Next(charsNoOIZU.Length)];
+                            break;
+
+                        case '1':
+                            newplates += digits[r.Next(digits.Length)];
+                            break;
+
+                        case '2':
+                            newplates += digitsNo01[r.Next(digitsNo01.Length)];
+                            break;
+
+                        case ' ':
+                            newplates += ' ';
+                            break;
+                    }
+                }
+                if (i < 49)
+                    newplates += ',';
+            }
+            Console.WriteLine(newplates);
         }
 
         private static void test3()
