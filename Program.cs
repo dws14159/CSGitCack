@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +15,115 @@ using System.Threading.Tasks;
 
 namespace CSGitCack
 {
+    #region XYstuff
+    public class XYBase
+    {
+        public virtual void Speak()
+        {
+            Console.WriteLine("XYBase");
+        }
+    }
+
+    public class XYLevel1A : XYBase
+    {
+        public override void Speak()
+        {
+            Console.WriteLine("XYLevel1A");
+        }
+    }
+    public class XYLevel1B : XYBase
+    {
+        public override void Speak()
+        {
+            Console.WriteLine("XYLevel1B");
+        }
+    }
+    public class XYLevel2 : XYLevel1A
+    {
+        public override void Speak()
+        {
+            Console.WriteLine("XYLevel2");
+        }
+    }
+    public static class XYExtensions
+    {
+        public static void UpSpeak(this XYBase foo)
+        {
+            Console.WriteLine("XYBase UpSpeak");
+        }
+        public static void UpSpeak(this XYLevel1A foo)
+        {
+            Console.WriteLine("XYLevel1A UpSpeak");
+        }
+        public static void UpSpeak(this XYLevel1B foo)
+        {
+            Console.WriteLine("XYLevel1B UpSpeak");
+        }
+        public static void UpSpeak(this XYLevel2 foo)
+        {
+            Console.WriteLine("XYLevel2 UpSpeak");
+        }
+    }
+    #endregion
+
+    #region Clock tower event stuff
+    public class Person
+    {
+        private string name;
+        private ClockTower tower;
+        private List<int> InterestedTimes;
+        //private
+        public Person(string n, ClockTower c, List<int> it)
+        {
+            name = n;
+            tower = c;
+            InterestedTimes = it;
+
+            tower.Chime += (object sender, ClockTowerEventArgs args) =>
+            {
+                if (InterestedTimes.Contains(args.Time))
+                {
+                    Console.WriteLine($"{name} responding to chime at {args.Time}");
+                }
+            };
+
+            string s = $"Initialising new Person({name}, ClockTower, times[{string.Join(",", it)}]";
+            Console.WriteLine(s);
+        }
+    }
+
+    public class ClockTowerEventArgs : EventArgs
+    {
+        public int Time { get; set; }
+    }
+
+    public delegate void ChimeEventHandler(object sender, ClockTowerEventArgs e);
+    public class ClockTower
+    {
+        public event ChimeEventHandler Chime;
+        private int hours, mins;
+
+        public ClockTower()
+        {
+            hours = mins = 0;
+        }
+        public int Tick()
+        {
+            mins++;
+            if (mins > 59)
+            {
+                mins = 0;
+                hours++;
+                if (hours > 23)
+                    hours = 0;
+            }
+            int ret = hours * 100 + mins;
+            Chime(this, new ClockTowerEventArgs { Time = ret });
+            return ret;
+        }
+    }
+    #endregion
+
     class Program
     {
         static void Main(string[] args)
@@ -21,7 +133,203 @@ namespace CSGitCack
             //    Console.WriteLine($"Argument: '{s}'");
             //}
 
-            test4();
+            test15();
+        }
+
+        // 10 11 12 13 14 15
+        private static void test15()
+        {
+            var t = new ClockTower();
+            var john = new Person("John", t, new List<int> { 1030, 1215, 1727 });
+            var sarah = new Person("Sarah", t, new List<int> { 1000, 1300, 1630 });
+            var abdul = new Person("Abdul", t, new List<int> { 725, 1025, 1325, 1625, 1925 });
+            for (int i = 0; i < 24 * 60; i++)
+            {
+                int ticks = t.Tick();
+                //Console.WriteLine($"At step {i} the time advanced to {ticks}");
+            }
+        }
+
+        private static void test14()
+        {
+            Console.WriteLine("List of XYBase");
+            var BaseList = new List<XYBase>();
+            BaseList.Add(new XYBase());
+            BaseList.Add(new XYLevel1A());
+            BaseList.Add(new XYLevel1B());
+            BaseList.Add(new XYLevel2());
+
+            foreach (XYBase b in BaseList)
+            {
+                //b.UpSpeak(); // doesn't work: everything says "XYBase UpSpeak"
+                XYExtensions.UpSpeak(b as dynamic); // works but isn't in the form "object.verb()"
+            }
+
+            var L1AList = new List<XYLevel1A>();
+            L1AList.Add(new XYLevel1A());
+            L1AList.Add(new XYLevel2());
+
+            Console.WriteLine("List of XYLevel1A foreach XYBase");
+            foreach (XYBase b in L1AList)
+            {
+                //b.UpSpeak();
+                XYExtensions.UpSpeak(b as dynamic);
+            }
+
+            Console.WriteLine("List of XYLevel1A foreach XYLevel1A");
+            foreach (XYLevel1A b in L1AList)
+            {
+                //b.UpSpeak();
+                XYExtensions.UpSpeak(b as dynamic);
+            }
+        }
+
+        private static void test13()
+        {
+            string fileName = "";
+            for (int i = 0; ; i++)
+            {
+                fileName = String.Format("Z:\\Autogen {0:000}.lgxp", i);
+                if (!File.Exists(fileName))
+                    break;
+            }
+            Console.WriteLine($"File '{fileName}' doesn't exist");
+        }
+
+        private static void test12()
+        {
+            String[] ss = { "\nA\n", "  B  ", "\nC  " };
+            char[] TrimChars = { ' ', '\r', '\n', '\t' };
+            //foreach(char c in TrimChars)
+            //{
+            //    Console.WriteLine(Char.IsWhiteSpace(c) ? "TRUE" : "FALSE");
+            //}
+            foreach (String p1 in ss)
+            {
+                string p = p1.Trim();
+                //p.TrimStart(TrimChars);
+                //p.TrimEnd(TrimChars);
+                Console.WriteLine($"p='{p}'");
+            }
+        }
+
+        private static void test11()
+        {
+            int foo = 27;
+            int.TryParse("bob", out foo);
+            Console.WriteLine($"foo after TryParse='{foo}'");
+        }
+
+        private static void foo(int x, int y)
+        {
+            Console.WriteLine($"x={x}, y={y}");
+        }
+
+        private static void test10()
+        {
+            int a = 5;
+            Console.WriteLine($"{++a + ++a + ++a + ++a + ++a}");
+            foo(y: ++a, x: --a);
+            foo(x: ++a, y: --a);
+        }
+        private static void test9()
+        {
+            RectangleF Bound = new RectangleF(0, 0, 200, 150);
+            float infX = -0.05F * Bound.Width;
+            float infY = -0.05F * Bound.Height;
+            RectangleF Margin = RectangleF.Inflate(Bound, infX, infY);
+            Console.WriteLine($"BoundLRTB = '{Bound.Left} {Bound.Right} {Bound.Top} {Bound.Bottom}'");
+            Console.WriteLine($"Inflate by {infX} {infY}");
+            Console.WriteLine($"MarginLRTB = '{Margin.Left} {Margin.Right} {Margin.Top} {Margin.Bottom}'");
+        }
+        private static void test8()
+        {
+            string s = "     Hello";
+            string s1 = s.TrimStart();
+            Console.WriteLine($"TrimStart(spc) '{s}' -> '{s1}'");
+        }
+
+        private static object GetAnonThing()
+        {
+            return new { Shop = "Tesco", Age = 27 };
+        }
+        private static void test7()
+        {
+            //object o = null;
+            object o = GetAnonThing();
+
+            string s = (string)o?.GetType().GetProperty("Name")?.GetValue(o, null);
+            int a = (int?)o?.GetType().GetProperty("Age")?.GetValue(o, null) ?? 0;
+            Console.WriteLine($"Name:{s} Age:{a}");
+        }
+
+        private static void test6()
+        {
+            // CSV preprocesor:
+            // (1) quotes and commas  ["a,b",c] -> [a b,c] so that "a,b" means one parameter [a b]
+            // (2) Make sure last (11th, 0-based) field is five non-zero digits
+            string inFile = "C:\\Users\\dspencer\\Downloads\\MOCK_DATA_1.csv";
+            string outFile = "C:\\Users\\dspencer\\Downloads\\MOCK_DATA_2.csv";
+            string[] lines = File.ReadAllLines(inFile);
+            FileStream of = File.Create(outFile);
+            StreamWriter sw = new StreamWriter(of);
+            bool inQuotes = false;
+            foreach (string Line in lines)
+            {
+                string outLine = "";
+                int field = 0;
+                Console.WriteLine($"Starting string: [{Line}]");
+                foreach (char c in Line)
+                {
+                    if (inQuotes)
+                    {
+                        if (c == '\"')
+                            inQuotes = false;
+                        else
+                        {
+                            if (c == ',')
+                                outLine += ' '; // replace commas with spaces
+                            else
+                                outLine += c;
+                        }
+                    }
+                    else
+                    {
+                        if (c == ',')
+                            field++;
+
+                        if (c == '\"')
+                        {
+                            inQuotes = true;
+                            // don't copy quote to outLine
+                        }
+                        else
+                        {
+                            if (field == 11 && c == '0')
+                                outLine += '1';
+                            else
+                                outLine += c;
+                        }
+                    }
+                }
+                Console.WriteLine($"Ending string  : [{outLine}]");
+                sw.WriteLine(outLine);
+            }
+            sw.Close();
+            of.Close();
+        }
+
+        private static void test5()
+        {
+            for (;;)
+            {
+                Console.WriteLine("Enter string to hash");
+                string str = Console.ReadLine();
+                using (var sha1 = new SHA1Managed())
+                {
+                    Console.WriteLine($"The hash of '{str}' is '{BitConverter.ToString(sha1.ComputeHash(Encoding.UTF8.GetBytes(str))).Replace("-","")}'");
+                }
+            }
         }
 
         private static void test4()
