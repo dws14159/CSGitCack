@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -133,7 +134,57 @@ namespace CSGitCack
             //    Console.WriteLine($"Argument: '{s}'");
             //}
 
-            test15();
+            test16();
+        }
+
+        // Is StringBuilder really more performant than string?  1000x10000
+        // string test took 63897 ms
+        // StringBuilder test took 147 ms
+        private static void test16()
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+            for (int i=0; i<1000; i++)
+            {
+                if ((i % 50) == 0)
+                    Console.Write(i);
+                string foo = "Hello Bob ";
+                for (int j=0; j<10000; j++)
+                {
+                    foo += "and Bob";
+                    if ((i%50)==0)
+                        if ((j%2000)==0)
+                            Console.Write(".");
+                }
+            }
+            Console.WriteLine($"string test took {sw.ElapsedMilliseconds} ms");
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < 1000; i++)
+            {
+                if ((i % 50) == 0)
+                    Console.Write(i);
+                var bar = new StringBuilder("Hello Bob ");
+                for (int j = 0; j < 10000; j++)
+                {
+                    bar.Append("and Bob");
+                    if ((i % 50) == 0)
+                        if ((j % 2000) == 0)
+                            Console.Write(".");
+                }
+            }
+            Console.WriteLine($"StringBuilder test took {sw.ElapsedMilliseconds} ms");
+        }
+
+        private static void test16()
+        {
+            // Is it possible to create a file with a question mark in the name?  Not this way; it throws an exception.
+            // System.ArgumentException: Illegal characters in path
+            string fileName = "D:\\Hello?World.txt";
+            using (StreamWriter outputFile = new StreamWriter(fileName))
+            {
+                outputFile.WriteLine("Greetings earthling");
+            }
         }
 
         // 10 11 12 13 14 15
