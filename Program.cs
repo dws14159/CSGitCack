@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -134,13 +135,25 @@ namespace CSGitCack
             //    Console.WriteLine($"Argument: '{s}'");
             //}
 
-            test16();
+            Assembly thisAssem = typeof(Program).Assembly;
+            AssemblyName thisAssemName = thisAssem.GetName();
+
+            Version ver = thisAssemName.Version;
+
+            Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
+
+            test18();
+        }
+
+        private static void test18()
+        {
+            Console.WriteLine("Test stub");
         }
 
         // Is StringBuilder really more performant than string?  1000x10000
         // string test took 63897 ms
         // StringBuilder test took 147 ms
-        private static void test16()
+        private static void test17()
         {
             var sw = new Stopwatch();
             sw.Start();
