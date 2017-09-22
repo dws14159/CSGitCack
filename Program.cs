@@ -126,6 +126,18 @@ namespace CSGitCack
     }
     #endregion
 
+    #region Z-order stuff
+    public class ZedThing
+    {
+        public string message;
+        public int zPos;
+        public ZedThing(string message, int zPos)
+        {
+            this.message = message;
+            this.zPos = zPos;
+        }
+    }
+    #endregion
     class Program
     {
         static void Main(string[] args)
@@ -145,9 +157,23 @@ namespace CSGitCack
             test18();
         }
 
+        // Test18: testing z-order stuff
+        // https://stackoverflow.com/questions/3309188/how-to-sort-a-listt-by-a-property-in-the-object/3309230#3309230
         private static void test18()
         {
-            Console.WriteLine("Test stub");
+            var theList = new List<ZedThing>();
+            theList.Add(new ZedThing("dog.", 4));
+            theList.Add(new ZedThing("brown fox ", 1));
+            theList.Add(new ZedThing("the lazy ", 3));
+            theList.Add(new ZedThing("The quick ", 0));
+            theList.Add(new ZedThing("jumps over ", 2));
+            //theList.Add(new ZedThing("", ));
+
+            foreach (var v in theList.OrderBy(o => o.zPos))
+            {
+                Console.Write(v.message);
+            }
+            Console.WriteLine("");
         }
 
         // Is StringBuilder really more performant than string?  1000x10000
