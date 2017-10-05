@@ -154,7 +154,17 @@ namespace CSGitCack
 
             Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
 
-            test18();
+            test19();
+        }
+        // Restrict a value using min/max
+        private static void test19()
+        {
+            for (int i=0; i<10; i++)
+            {
+                int least = 2, most = 8;
+                int disp = Math.Min(Math.Max(i, least), most);
+                Console.WriteLine(i + " -> " + disp);
+            }
         }
 
         // Test18: testing z-order stuff
