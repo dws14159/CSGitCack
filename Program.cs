@@ -154,8 +154,92 @@ namespace CSGitCack
 
             Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
 
-            test19();
+            test20();
         }
+
+        static int[] primes = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97 };
+
+        static int nextPrime(int p)
+        {
+            for (int i=0; i<primes.Count()-1; i++)
+            {
+                if (primes[i] == p)
+                    return primes[i + 1];
+            }
+            Console.WriteLine($"nextPrime({p}) couldn't return a value");
+            return 0;
+        }
+        static bool isPrime(int p)
+        {
+            foreach (var v in primes)
+            {
+                if (p == v)
+                    return true;
+            }
+            return false;
+        }
+        // Brute force solver for https://puzzling.stackexchange.com/questions/56369/how-many-coins-did-mrs-jones-have
+        private static void test20()
+        {
+            for (int lisaAge = 13; lisaAge <= 19; lisaAge++) // Lisa is teenage
+            {
+                if (isPrime(lisaAge))
+                {
+                    for (int jackAge = lisaAge + 2; jackAge < 43; jackAge++) // Lisa is "the teenager" so Jack and Amy must be at least 23
+                    {
+                        if (isPrime(jackAge) && jackAge == nextPrime(lisaAge))
+                        {
+                            for (int amyAge = jackAge + 2; amyAge < 43; amyAge++)
+                            {
+                                if (isPrime(amyAge) && amyAge == nextPrime(jackAge))
+                                {
+                                    Console.WriteLine($"Testing ages L:{lisaAge},J:{jackAge},A:{amyAge}");
+                                    for (int month=1; month<=12; month++)
+                                    {
+                                        if (isPrime(month))
+                                        {
+                                            for (int lisaDay=1; lisaDay<=31; lisaDay++)
+                                            {
+                                                if (isPrime(lisaDay))
+                                                {
+                                                    for (int jackDay=1; jackDay<=31; jackDay++)
+                                                    {
+                                                        if (isPrime(jackDay))
+                                                        {
+                                                            for (int amyDay=1; amyDay<=31; amyDay++)
+                                                            {
+                                                                if (isPrime(amyDay))
+                                                                {
+                                                                    int lisaCoins = lisaAge + month + lisaDay;
+                                                                    int jackCoins = jackAge + month + jackDay;
+                                                                    int amyCoins = amyAge + month + amyDay;
+                                                                    if (isPrime(lisaCoins) && isPrime(jackCoins) && isPrime(amyCoins) && isPrime(lisaCoins+jackCoins+amyCoins))
+                                                                    {
+                                                                        if (lisaCoins > jackCoins && lisaCoins > amyCoins)
+                                                                        {
+                                                                            if (!(lisaCoins == jackCoins || lisaCoins == amyCoins || jackCoins == amyCoins))
+                                                                            {
+                                                                                Console.WriteLine($"Got possible solution: month={month}, days are L:{lisaDay},J:{jackDay},A:{amyDay}, coins are L:{lisaCoins},J:{jackCoins},A:{amyCoins}, total coins={lisaCoins + jackCoins + amyCoins}");
+                                                                                //Console.ReadLine();
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Restrict a value using min/max
         private static void test19()
         {
