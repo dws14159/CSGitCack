@@ -154,7 +154,23 @@ namespace CSGitCack
 
             Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
 
-            test20();
+            test21();
+        }
+        // Compare byte arrays
+        private static void test21()
+        {
+            bool equal = true;
+            byte[] a = { 1, 2, 3, 4, 5 };
+            byte[] b = { 1, 2, 3, 4, 5 };
+            if (a.Length != b.Length)
+                equal = false;
+            for (int len = 0; len < a.Length && equal == true; len++)
+                if (a[len] != b[len])
+                    equal = false;
+            Console.WriteLine("Test with a for loop");
+            Console.WriteLine(equal ? "Arrays are equal" : "Arrays are not equal");
+            Console.WriteLine("Test with ==");
+            Console.WriteLine(a == b ? "Arrays are equal" : "Arrays are not equal");
         }
 
         static int[] primes = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97 };
