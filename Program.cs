@@ -154,8 +154,15 @@ namespace CSGitCack
 
             Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
 
-            test21();
+            test22();
         }
+
+        private static void test22()
+        {
+            Console.WriteLine($"This is what happens if you try Console WriteLine null --> [{null}]");
+            Console.WriteLine($"How to replace the missing result with string NULL --> [{null ?? ("NULL")}]");
+        }
+
         // Compare byte arrays
         private static void test21()
         {
