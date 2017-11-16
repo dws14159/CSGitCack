@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
+using System.Windows.Forms;
 
 // UNC paths are not supported.  Defaulting to Windows directory.
 // To fix this, go to the project Properties -> Debug, change Working directory to somewhere on a local drive.
@@ -138,6 +140,62 @@ namespace CSGitCack
         }
     }
     #endregion
+
+    #region test24 memleak stuff
+    public class MemLeak
+    {
+        public BitmapImage ImageSourceFromFile(string myImageFile)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(myImageFile))
+                    return null;
+
+                var image = new BitmapImage();
+                var ms = new MemoryStream();
+                BitmapDecoder bd;
+                using (FileStream fs = File.OpenRead(myImageFile))
+                {
+                    string ext = Path.GetExtension(myImageFile).ToUpper();
+                    switch (ext)
+                    {
+                        case ".BMP":
+                            bd = new BmpBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                            break;
+                        case ".GIF":
+                            bd = new GifBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                            break;
+                        case ".JPG":
+                        case ".JPEG":
+                            bd = new JpegBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                            break;
+                        case ".PNG":
+                            bd = new PngBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                            break;
+                        default:
+                            throw new Exception($"Unknown file extension '{ext}'");
+                    }
+                    var png = new PngBitmapEncoder();
+                    png.Frames.Add(bd.Frames[0]);
+                    png.Save(ms);
+
+                    image.BeginInit();
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.StreamSource = ms;
+                    image.EndInit();
+                }
+                return image;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"File Open error: '{ex.Message}'");
+                return null;
+            }
+        }
+
+    }
+    #endregion
+
     class Program
     {
         static void Main(string[] args)
@@ -154,7 +212,140 @@ namespace CSGitCack
 
             Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
 
-            test22();
+            test24();
+        }
+
+        private static void test24()
+        {
+            // In an infinite loop:
+            // - select a random *.png filename from C:\Users\Public\Documents\CCL\lgsystems\Badges
+            // - load it with MemLeak.ImageSourceFromFile
+            var mem = new MemLeak();
+            Random rnd = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
+            var files = Directory.GetFiles("C:\\Users\\Public\\Documents\\CCL\\lgsystems\\Badges");
+            int count = 0;
+            for (;;)
+            {
+                string file = files[rnd.Next(files.Length)];
+                if (Path.GetExtension(file)==".png")
+                {
+                    var img = mem.ImageSourceFromFile(file);
+                    count++;
+                    if (count>99)
+                    {
+                        count = 0;
+                        Console.Write(".");
+                    }
+                }
+            }
+        }
+
+        private static void test23()
+        {
+            // Plates: every position can be X I or space.  8 characters.
+            // Ternary column values: 1 3 9 27 81 243 729 2187 6561
+
+            string[] ValidMasks =
+            {
+                // One letter one number &vv
+                "NN......",
+                // 1-3 letters, 1-3 numbers &vv not 1&1
+                "NNN.NNN.", "NNN.NN..", "NNN.N...", "NN.NNN..", "NN.NN...", "NN.N....", "N.NNN...", "N.NN....",
+                // Post 2001  AB12 CDE
+                "NNNN.NNN.",
+                // Prefix D123 ABC
+                "NNNN.NNN.", "NNN.NNN.", "NN.NNN..",
+                // Suffix ABC 123D
+                "NNN.NNNN.", "NNN.NNN..", "NNN.NN..",
+                // 4 digits 1 or 2 letters &vv
+                "NNNN.N..", "NNNN.NN.", "N.NNNN..", "NN.NNNN.",
+                // 3 letters 4 numbers &vv
+                "NNN.NNNN", "NNNN.NNN"
+
+            };
+            var DistinctLengths = new List<int[]>();
+
+            int lines = 0;
+            int count = 1;
+            for (int i=0; i<6561; i++)
+            {
+                int t = i;
+                string op = "";
+                string mask = "";
+                for (int j=0; j<8; j++)
+                {
+                    char c = '.';
+                    char m = '.';
+                    switch (t%3)
+                    {
+                        case 1:
+                            c = 'I';
+                            m = 'N';
+                            break;
+                        case 2:
+                            c = 'X';
+                            m = 'N';
+                            break;
+                    }
+                    op += c;
+                    mask += m;
+                    t /= 3;
+                }
+                if (ValidMasks.Contains(mask))
+                {
+                    Console.Write($"{op} {count} ");
+                    count++;
+                    lines++;
+
+                    op = op.Replace('.', ' ').Trim();
+                    op += ' ';
+                    int which = 0;
+                    int[] len = { 0, 0 };
+                    for (int k = 0; k < op.Length - 1; k++)
+                    {
+                        switch (op[k])
+                        {
+                            case 'I':
+                                if (op[k + 1] == ' ')
+                                    len[which] += 46;
+                                else
+                                    len[which] += 82;
+                                break;
+
+                            case 'X':
+                                if (op[k + 1] == ' ')
+                                    len[which] += 168;
+                                else
+                                    len[which] += 204;
+                                break;
+
+                            case ' ':
+                                which = 1;
+                                break;
+                        }
+                    }
+                    Console.WriteLine($"Lengths=[{len[0]}, {len[1]}] Sum=[{len[0]+len[1]}]");
+                    bool gotIt = false;
+                    foreach (var v in DistinctLengths)
+                    {
+                        if (v[0] == len[0] && v[1] == len[1])
+                            gotIt = true;
+                    }
+                    if (!gotIt)
+                        DistinctLengths.Add(new int[] { len[0], len[1] });
+                    if (lines > 40)
+                    {
+                        //Console.Read();
+                        lines = 0;
+                    }
+                }
+            }
+            Console.WriteLine("Distinct lengths:");
+            foreach (var v1 in DistinctLengths)
+            {
+                Console.WriteLine($"{v1[0]} {v1[1]}");
+            }
+            Console.WriteLine("End");
         }
 
         private static void test22()
