@@ -12,6 +12,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Forms;
+using System.Windows.Media;
+using System.Globalization;
+using System.Windows;
 
 // UNC paths are not supported.  Defaulting to Windows directory.
 // To fix this, go to the project Properties -> Debug, change Working directory to somewhere on a local drive.
@@ -212,7 +215,49 @@ namespace CSGitCack
 
             Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
 
-            test24();
+            test25();
+        }
+
+        // test25: What does GetTextGeometryAndFormatting do if the text is empty?
+        // Ans: Bounds.Width=-Inf.  Bounds.Width < 20 returns TRUE.
+        #region GetTextGeometryAndFormatting
+        static void GetTextGeometryAndFormatting(string Text, string Font, double FontSize, bool Italics, bool Bold, System.Windows.Point Location, System.Windows.Media.Color Colour, out Geometry geom, out FormattedText ft, out System.Windows.Point whitespace)
+        {
+            var tf = new Typeface(new System.Windows.Media.FontFamily(Font),
+                Italics ? FontStyles.Italic : FontStyles.Normal,
+                Bold ? FontWeights.Bold : FontWeights.Normal,
+                FontStretches.Normal);
+            var br1 = new SolidColorBrush();
+            try
+            {
+                br1.Color = Colour;
+            }
+            catch
+            {
+                br1.Color = System.Windows.Media.Color.FromArgb(255, 0, 0, 0);
+            }
+            string measureString = Text;
+            ft = new FormattedText(measureString, CultureInfo.InvariantCulture, System.Windows.FlowDirection.LeftToRight, tf, FontSize, br1);
+
+            // Problem is: we don't know what the space dimensions are.  So if we draw it at 0,0, then the bounding rectangle will start at x,y which indicates the space dimension.
+            var geom1 = ft.BuildGeometry(new System.Windows.Point(0, 0));
+            // geom1.Bounds.TopLeft is now the width and height of the whitespace
+
+            // Rebuild the geometry to discard the whitespace and offset by this.(x,y), because for general use elsewhere we want geom.Bounds to indicate the drawn text area
+            whitespace = geom1.Bounds.TopLeft; // draw however still needs to be able to take this into account
+            System.Windows.Point offset = new System.Windows.Point(whitespace.X * -1 + Location.X, whitespace.Y * -1 + Location.Y);
+            geom = ft.BuildGeometry(offset);
+        }
+        #endregion
+        private static void test25()
+        {
+            Geometry geom;
+            FormattedText ft;
+            System.Windows.Point whitespace;
+            string testStr = "";
+            GetTextGeometryAndFormatting(testStr, "Arial", 12, false, false, new System.Windows.Point(0, 0), System.Windows.Media.Colors.Black, out geom, out ft, out whitespace);
+            Console.WriteLine($"Width of test string '{testStr}' is {geom.Bounds.Width}");
+            Console.WriteLine($"So is this smaller than a rectangle of width 20? [{(geom.Bounds.Width<20).ToString()}]");
         }
 
         private static void test24()
