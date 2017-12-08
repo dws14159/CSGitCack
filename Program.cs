@@ -215,8 +215,49 @@ namespace CSGitCack
 
             Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
 
-            test27();
+            test28();
         }
+        // Check multiline string literals work as expected
+        private static void test29()
+        {
+            string test = "Hello-" +
+                "There-" +
+                "Everyone";
+            Console.WriteLine(test);
+        }
+        // Base 64 encode a named file
+        private static void test28()
+        {
+            string[] fileNames = {"Laser_Charles_Wright.ttf", "LaserCW_MB.ttf", "LaserCW_MB_3D.ttf", "Laser_Charles_Wright_3D.ttf",
+                "Laser_Charles_Wright_Inline.ttf", "Laser_Charles_Wright_MC.ttf", "Laser_Charles_Wright_MC_3D.ttf",
+                "Laser_Charles_Wright_MC_HL.ttf", "Laser_France.ttf", "Laser_IRL.ttf", "Laser_UK79.ttf"};
+            foreach (var fn in fileNames)
+            {
+                string fnNoExt = fn.Replace(".ttf", "");
+                Console.WriteLine($"        static string {fnNoExt} = ");
+
+                string f2enc = $"D:\\MiscJunk\\fonts\\{fn}";
+                var b64 = Convert.ToBase64String(File.ReadAllBytes(f2enc));
+                int count = 0, chars = 0, lines = 0;
+                foreach (char c in b64)
+                {
+                    if (count == 0)
+                        Console.Write("            \"");
+                    Console.Write(c);
+                    chars++;
+                    count++;
+                    if (count > 119)
+                    {
+                        Console.WriteLine("\" +");
+                        lines++;
+                        count = 0;
+                    }
+                }
+                Console.WriteLine("\";\n");
+                // Console.WriteLine($"Lines: {lines}; Characters: {chars}");
+            }
+        }
+
         // test27: get resource font -- doesn't work
         private static void test27()
         {
