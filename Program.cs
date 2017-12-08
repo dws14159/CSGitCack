@@ -215,9 +215,29 @@ namespace CSGitCack
 
             Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
 
-            test25();
+            test27();
+        }
+        // test27: get resource font -- doesn't work
+        private static void test27()
+        {
+            var foo = new Uri("pack://application:,,,/");
+            var ff = new System.Windows.Media.FontFamily(new Uri("pack://application:,,,/"), "./resources/#Laser Charles Wright");
+            //new System.Windows.Media.FontFamily(new Uri("pack://application:,,,/"), "./resources/#Laser Charles Wright");
         }
 
+        // test26: is a font installed?
+        private static void test26()
+        {
+            string strLaser = "Laser Charles Wright";
+            var fntLaser = new Font(strLaser, 8);
+            bool instLaser = strLaser.Equals(fntLaser.Name, StringComparison.InvariantCultureIgnoreCase);
+
+            string strWibble = "Wibble";
+            var fntWibble = new Font(strWibble, 8);
+            bool instWibble = strWibble.Equals(fntWibble.Name, StringComparison.InvariantCultureIgnoreCase);
+
+            Console.WriteLine($"'{strLaser}' installed: [{instLaser}]; '{strWibble}' installed: [{instWibble}]");
+        }
         // test25: What does GetTextGeometryAndFormatting do if the text is empty?
         // Ans: Bounds.Width=-Inf.  Bounds.Width < 20 returns TRUE.
         #region GetTextGeometryAndFormatting
