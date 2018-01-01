@@ -216,8 +216,20 @@ namespace CSGitCack
 
             Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
 
-            test30();
+            test31();
         }
+        // Can I access UNC directories? (Yes)
+        private static void test31()
+        {
+            DirectoryInfo d = new DirectoryInfo(@"\\DESKTOP-VQNL9IV\Content\JJ\AV");
+
+            foreach (var file in d.GetFiles("*.*"))
+            {
+                string filename = file.ToString();
+                Console.WriteLine(filename);
+            }
+        }
+
         // Basic DataTable stuff
         static void test30a(DataTable t)
         {
