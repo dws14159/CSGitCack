@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Management;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -213,10 +214,34 @@ namespace CSGitCack
 
             Version ver = thisAssemName.Version;
 
-            Console.WriteLine("This is version {0} of {1}.", ver, thisAssemName.Name);
+            Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test28();
+            test31();
         }
+
+        private static void test31()
+        {
+            var printerQuery = new ManagementObjectSearcher("SELECT * from Win32_Printer");
+            foreach (var printer in printerQuery.Get())
+            {
+                var name = printer.GetPropertyValue("Name");
+                var status = printer.GetPropertyValue("Status");
+                var isDefault = printer.GetPropertyValue("Default");
+                var isNetworkPrinter = printer.GetPropertyValue("Network");
+
+                Console.WriteLine("{0} (Status: {1}, Default: {2}, Network: {3}",
+                            name, status, isDefault, isNetworkPrinter);
+            }
+        }
+
+        private static void test30()
+        {
+            foreach (string printer in System.Drawing.Printing.PrinterSettings.InstalledPrinters)
+            {
+                Console.WriteLine(printer);
+            }
+        }
+
         // Check multiline string literals work as expected
         private static void test29()
         {
