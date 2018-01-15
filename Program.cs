@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using System.Windows.Media;
 using System.Globalization;
 using System.Windows;
+using System.Data;
 
 // UNC paths are not supported.  Defaulting to Windows directory.
 // To fix this, go to the project Properties -> Debug, change Working directory to somewhere on a local drive.
@@ -240,6 +241,90 @@ namespace CSGitCack
             {
                 Console.WriteLine(printer);
             }
+            test31();
+        }
+        // Can I access UNC directories? (Yes)
+        private static void test31()
+        {
+            DirectoryInfo d = new DirectoryInfo(@"\\DESKTOP-VQNL9IV\Content\JJ\AV");
+
+            foreach (var file in d.GetFiles("*.*"))
+            {
+                string filename = file.ToString();
+                Console.WriteLine(filename);
+            }
+        }
+
+        // Basic DataTable stuff
+        static void test30a(DataTable t)
+        {
+            DataColumn column;
+            column = new DataColumn();
+            column.DataType = System.Type.GetType("System.Int32");
+            column.ColumnName = "moo";
+            column.ReadOnly = true;
+            column.Unique = true;
+            // Add the Column to the DataColumnCollection.
+            t.Columns.Add(column);
+        }
+
+        static DataTable test30b(DataTable t)
+        {
+            DataColumn column;
+            column = new DataColumn();
+            column.DataType = System.Type.GetType("System.Int32");
+            column.ColumnName = "oink";
+            column.ReadOnly = true;
+            column.Unique = true;
+            // Add the Column to the DataColumnCollection.
+            t.Columns.Add(column);
+            return t;
+        }
+
+        private static void test30()
+        {
+            DataTable table = new DataTable("Fred");
+            DataColumn column;
+            DataRow row;
+
+            // Create new DataColumn, set DataType, 
+            // ColumnName and add to DataTable.    
+            column = new DataColumn();
+            column.DataType = System.Type.GetType("System.Int32");
+            column.ColumnName = "id";
+            column.ReadOnly = true;
+            column.Unique = true;
+            // Add the Column to the DataColumnCollection.
+            table.Columns.Add(column);
+
+            test30a(table);
+            table = test30b(table);
+
+            // Create second column.
+            column = new DataColumn();
+            column.DataType = System.Type.GetType("System.String");
+            column.ColumnName = "ParentItem";
+            column.AutoIncrement = false;
+            column.Caption = "ParentItem";
+            column.ReadOnly = false;
+            column.Unique = false;
+            // Add the column to the table.
+            table.Columns.Add(column);
+
+            // Create three new DataRow objects and add 
+            // them to the DataTable
+            for (int i = 0; i <= 2; i++)
+            {
+                row = table.NewRow();
+                row["id"] = i;
+                row["moo"] = i;
+                row["oink"] = i;
+                row["ParentItem"] = "ParentItem " + i;
+                table.Rows.Add(row);
+            }
+            table.AcceptChanges();
+            DataTable table2 = table.Copy();
+            Console.WriteLine("Blat!");
         }
 
         // Check multiline string literals work as expected
