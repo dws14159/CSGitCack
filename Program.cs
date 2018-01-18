@@ -215,6 +215,8 @@ namespace CSGitCack
 
             Version ver = thisAssemName.Version;
 
+            // https://blog.soltysiak.it/en/2017/07/attach-git-commit-sha1-hash-to-your-assembly/
+            Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
             test33();
