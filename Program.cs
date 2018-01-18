@@ -217,10 +217,10 @@ namespace CSGitCack
 
             Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test31();
+            test33();
         }
 
-        private static void test31()
+        private static void test33()
         {
             var printerQuery = new ManagementObjectSearcher("SELECT * from Win32_Printer");
             foreach (var printer in printerQuery.Get())
@@ -235,14 +235,14 @@ namespace CSGitCack
             }
         }
 
-        private static void test30()
+        private static void test32()
         {
             foreach (string printer in System.Drawing.Printing.PrinterSettings.InstalledPrinters)
             {
                 Console.WriteLine(printer);
             }
-            test31();
         }
+
         // Can I access UNC directories? (Yes)
         private static void test31()
         {
