@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Printing;
+using System.Printing.Interop;
 using System.Management;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,8 +17,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Globalization;
-using System.Windows;
 using System.Data;
+using System.Windows;
 
 // UNC paths are not supported.  Defaulting to Windows directory.
 // To fix this, go to the project Properties -> Debug, change Working directory to somewhere on a local drive.
@@ -193,7 +195,7 @@ namespace CSGitCack
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"File Open error: '{ex.Message}'");
+                System.Windows.MessageBox.Show($"File Open error: '{ex.Message}'");
                 return null;
             }
         }
@@ -220,7 +222,17 @@ namespace CSGitCack
             Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test33();
+            test35();
+        }
+
+        private static void test34()
+        {
+            int x = 0;
+            var printServer = new LocalPrintServer();
+            var queue = printServer.GetPrintQueue("OKI-C532-BE907F");
+            var queueStatus = queue.QueueStatus;
+            var jobStatus = queue.GetPrintJobInfoCollection().FirstOrDefault().JobStatus;
+            x++;
         }
 
         private static void test33()
@@ -235,6 +247,10 @@ namespace CSGitCack
 
                 Console.WriteLine("{0} (Status: {1}, Default: {2}, Network: {3}",
                             name, status, isDefault, isNetworkPrinter);
+                foreach (var pp in printer.Properties)
+                {
+                    Console.WriteLine($"- Property name [{pp.Name}] Value [{pp.Value}]");
+                }
             }
         }
 
