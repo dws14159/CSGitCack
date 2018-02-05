@@ -225,6 +225,11 @@ namespace CSGitCack
             test35();
         }
 
+        private static void test35()
+        {
+            Console.WriteLine($"Temp directory is [{Path.GetTempPath()}]"); // C:\Users\dspencer\AppData\Local\Temp\
+        }
+
         private static void test34()
         {
             int x = 0;
