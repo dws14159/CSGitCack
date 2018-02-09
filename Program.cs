@@ -222,7 +222,31 @@ namespace CSGitCack
             Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test35();
+            test36();
+        }
+
+        private static void test36()
+        {
+            string[] fields ={
+                "dmDeviceName","dmSpecVersion","dmDriverVersion","dmSize","dmDriverExtra","dmFields","dmOrientation",
+"dmPaperSize","dmPaperLength","dmPaperWidth","dmScale","dmCopies","dmDefaultSource","dmPrintQuality",
+"dmColor","dmDuplex","dmYResolution","dmTTOption","dmCollate","dmFormName","dmLogPixels","dmBitsPerPel",
+"dmPelsWidth","dmPelsHeight","dmDisplayFlags","dmDisplayFrequency","dmICMMethod","dmICMIntent","dmMediaType",
+"dmDitherType","dmICCManufacturer","dmICCModel","dmPanningWidth","dmPanningHeight"
+            };
+            string doll = "$";
+            string quot = "\"";
+            string brco = "{";
+            string brcc = "}";
+            foreach (var s in fields)
+            {
+                Console.WriteLine($"if (mode1.{s} != mode2.{s})");
+                Console.WriteLine($"Console.WriteLine({doll}{quot}{s} changed from [{brco}mode1.{s}{brcc}] to [{brco}mode2.{s}{brcc}]{quot});");
+
+                // if (mode1.dmDeviceName != mode2.dmDeviceName)
+                // Console.WriteLine($"dmDeviceName changed from [{mode1.dmDeviceName}] to [{mode2.dmDeviceName}]");
+
+            }
         }
 
         private static void test35()
