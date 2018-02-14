@@ -222,7 +222,53 @@ namespace CSGitCack
             Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test36();
+            test37();
+        }
+
+        // https://practice.geeksforgeeks.org/problems/is-binary-number-multiple-of-3/0
+        private static void test37()
+        {
+            string inputBinary = "1001011";
+            int ix = 1;
+            bool done=false;
+            bool div3 = false;
+            string partial = $"{inputBinary[0]}";
+            while (!done)
+            {
+                while (partial.Length < 3)
+                    partial = "0" + partial;
+                switch (partial)
+                {
+                    case "000":
+                    case "011":
+                    case "110":
+                        div3 = true; // 0,3,6
+                        partial = "00";
+                        break;
+
+                    case "001":
+                    case "100":
+                    case "111":
+                        div3 = false; // 1,4,7
+                        partial = "01";
+                        break;
+
+                    case "010":
+                    case "101":
+                        div3 = false; // 2,5
+                        partial = "10";
+                        break;
+                }
+                // get next bit
+                if (ix < inputBinary.Length)
+                {
+                    partial += inputBinary[ix];
+                    ix++;
+                }
+                else
+                    done = true;
+            }
+            Console.WriteLine(div3 ? $"inputBinary[{inputBinary}] is divisible by 3" : $"inputBinary[{inputBinary}] is not divisible by 3");
         }
 
         private static void test36()
