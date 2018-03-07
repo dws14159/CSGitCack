@@ -19,6 +19,7 @@ using System.Windows.Media;
 using System.Globalization;
 using System.Data;
 using System.Windows;
+using System.Xml;
 
 // UNC paths are not supported.  Defaulting to Windows directory.
 // To fix this, go to the project Properties -> Debug, change Working directory to somewhere on a local drive.
@@ -222,7 +223,27 @@ namespace CSGitCack
             Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test37();
+            test38();
+        }
+
+        // Example from https://msdn.microsoft.com/en-us/library/system.xml.xmldocument.createtextnode(v=vs.110).aspx
+        private static void test38()
+        {
+            //Create the XmlDocument.
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml("<book genre='novel' ISBN='1-861001-57-5'>" +
+                        "<title>Pride And Prejudice</title>" +
+                        "</book>");
+
+            //Create a new node and add it to the document.
+            //The text node is the content of the price element.
+            XmlElement elem = doc.CreateElement("price");
+            XmlText text = doc.CreateTextNode("19.95");
+            doc.DocumentElement.AppendChild(elem);
+            doc.DocumentElement.LastChild.AppendChild(text);
+
+            Console.WriteLine("Display the modified XML...");
+            doc.Save(Console.Out);
         }
 
         // https://practice.geeksforgeeks.org/problems/is-binary-number-multiple-of-3/0
