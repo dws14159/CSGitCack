@@ -220,10 +220,18 @@ namespace CSGitCack
 
             // https://blog.soltysiak.it/en/2017/07/attach-git-commit-sha1-hash-to-your-assembly/
             // Added AutoT4 extension
-            Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
-            Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
+            // Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
+            // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test38();
+            test39();
+        }
+
+        private static void test39()
+        {
+            int num = 27;
+            string str1 = num.ToString("X");
+            string str2 = num.ToString("X6");
+            Console.WriteLine($"str1:{str1}, str2:{str2}");
         }
 
         // Example from https://msdn.microsoft.com/en-us/library/system.xml.xmldocument.createtextnode(v=vs.110).aspx
