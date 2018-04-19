@@ -223,7 +223,30 @@ namespace CSGitCack
             // Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test39();
+            test40();
+        }
+
+        // Check if Random%6 is biased.  If it is then the average value over a lot of runs will be significantly
+        // different from 2.5.  It isn't.
+        private static void test40()
+        {
+            var RNG = new Random();
+            int total = 0, count = 0;
+            while (count<5000)
+            {
+                int num = RNG.Next() % 6;
+                total += num;
+                double average = (double)total / (double)count;
+                count++;
+                Console.WriteLine($"num={num}; total={total}; count={count}; average={average}");
+                //total += RNG.Next() % 6;
+                //count++;
+                //
+                //if (count % 50 == 0)
+                //{
+                //    Console.WriteLine($"Total={total}; Count={count}; Average={total/count}");
+                //}
+            }
         }
 
         private static void test39()
