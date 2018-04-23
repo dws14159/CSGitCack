@@ -223,7 +223,207 @@ namespace CSGitCack
             // Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test40();
+            test41a();
+        }
+
+        // List triangular numbers up to MAXTN
+        private static void test42()
+        {
+            int MAXTN = 15500;
+            int Tn = 1, diff = 2;
+            while (Tn <= MAXTN)
+            {
+                Tn += diff;
+                diff++;
+                Console.WriteLine($"{Tn}");
+            }
+        }
+
+        // Brute force solver for the missing leaf problem https://www.youtube.com/watch?v=GYFHMD_ja7c
+        // Cannot remove first leaf, whether 1 or 12, because there is no pair of triangular numbers that differs by 1 or 3.
+        // -- consider T4 and T6. Difference is 5+6=11.  If we go larger or take a bigger gap, the difference 11 will only increase.
+        // -- Yet we must go larger, because the remaining pages add up to 15000.
+        // -- The only Tn that differ by 3 are 1+2 and 1+2+3. No Tn differ by 1 (unless you count T0 and T1). None of these are 15K.
+        // -- Does T_n=15001 or 15003 exist?  No; T_n around 15000 are 14706 14878 * 15051 15225 15400 (source: test42())
+        // Cannot remove last leaf whether single or double sided, because the remaining pages add up to a triangular number, and there is no T_n=15000.
+        private static void test41a() // expanded version of test41
+        {
+            const int MAXLEAF = 250000;
+            // In this function we consider the wider set of possibilities.  We'll work with leaves this time, starting at 4.
+            // Pages could be 12 34 56 78, _1 23 45 67, 12 34 56 7_, _1 23 45 6_. Clearly some are equivalent since we can't remove first or last, but we'll check them anyway.
+
+            for (int leaf=4; leaf<=MAXLEAF; leaf++)
+            //for (int leaf = 86; leaf <= 88; leaf++) // Video solutions are 174 pages remove 112/113; 173 pages remove 25/26; 174 pages=87 leaves so we go from 85 to 89
+            {
+                // Reducing duplicate code
+                for (int leafRemoved = 1; leafRemoved < leaf - 1; leafRemoved++)
+                {
+                    int firstPage = 0, lastPage = 0;
+                    string eg = "";
+                    for (int blanks = 0; blanks < 4; blanks++)
+                    {
+                        switch (blanks)
+                        {
+                            case 0:
+                                // No blanks
+                                eg = "12 34 56 78";
+                                lastPage = leaf * 2; // last page of the book
+                                firstPage = 3 + (leafRemoved - 1) * 2; // first page of the removed leaf
+                                break;
+
+                            case 1:
+                                // Blank on the first leaf
+                                eg = "_1 23 45 67";
+                                firstPage = leafRemoved * 2; // first page of the removed leaf - clearly 2,4,6 in the eg
+                                lastPage = leaf * 2 - 1; // see eg: 4 leaves *2=8; -1=7
+                                break;
+
+                            case 2:
+                                // Blank on the last leaf
+                                eg = "12 34 56 7_";
+                                firstPage = leafRemoved * 2 + 1; // first page of the removed leaf - clearly 3,5,7 in the eg
+                                lastPage = leaf * 2 - 1; // see eg: 4 leaves *2=8; -1=7
+                                break;
+
+                            case 3:
+                                // Blank on the first and last leaf
+                                eg = "_1 23 45 6_";
+                                firstPage = leafRemoved * 2; // first page of the removed leaf - clearly 2,4(,6...) in the eg
+                                lastPage = (leaf - 1) * 2; // see eg: 4 leaves *2=8; -1=7
+                                break;
+                        }
+
+                        int leafSum = firstPage + firstPage + 1;
+                        int totalPages = lastPage * (lastPage + 1) / 2;
+                        if (totalPages - leafSum != 15000)
+                        {
+                            // Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} (blanks:{eg}) containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(!=15K -> no soln)");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} (blanks:{eg}) containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(=15K-> solution!)");
+                            // Console.ReadLine();
+                        }
+                    }
+                }
+                // //~~~~~~~
+                // // No blanks
+                // int lastPage = leaf * 2; // last page of the book
+                // Console.WriteLine($"Considering book of {leaf} leaves, no blanks, pages 1-{lastPage} (eg 12 34 56 78)");
+                // for (int leafRemoved=1; leafRemoved<leaf-1; leafRemoved++)
+                // {
+                //     int firstPage = 3 + (leafRemoved - 1) * 2; // first page of the removed leaf
+                //     int leafSum = firstPage + firstPage + 1;
+                //     int totalPages = lastPage * (lastPage + 1); // 4 leaves=36; *2=72 which is 8*9, i.e. last page*(last page+1)
+                //     if (totalPages - leafSum != 15000)
+                //     {
+                //         Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(!=15K -> no soln)");
+                //     }
+                //     else
+                //     {
+                //         Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(=15K-> solution!)");
+                //         Console.ReadLine();
+                //     }
+                // }
+                // 
+                // // Blank on the first leaf
+                // lastPage = leaf * 2 - 1; // see eg: 4 leaves *2=8; -1=7
+                // Console.WriteLine($"Considering book of {leaf} leaves, blank on first leaf, pages 1-{lastPage} (eg _1 23 45 67)");
+                // for (int leafRemoved = 1; leafRemoved < leaf - 1; leafRemoved++)
+                // {
+                //     int firstPage = leafRemoved * 2; // first page of the removed leaf - clearly 2,4,6 in the eg
+                //     int leafSum = firstPage + firstPage + 1;
+                //     int totalPages = lastPage * (lastPage + 1); // 4 leaves=28; *2=56 which is 7*8, i.e. last page*(last page+1)
+                //     if (totalPages - leafSum != 15000)
+                //     {
+                //         Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(!=15K -> no soln)");
+                //     }
+                //     else
+                //     {
+                //         Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(=15K-> solution!)");
+                //         Console.ReadLine();
+                //     }
+                // }
+                // 
+                // // Blank on the last leaf
+                // lastPage = leaf * 2 - 1; // see eg: 4 leaves *2=8; -1=7
+                // Console.WriteLine($"Considering book of {leaf} leaves, blank on last leaf, pages 1-{lastPage} (eg 12 34 56 7_)");
+                // for (int leafRemoved = 1; leafRemoved < leaf - 1; leafRemoved++)
+                // {
+                //     int firstPage = leafRemoved * 2 + 1; // first page of the removed leaf - clearly 3,5,7 in the eg
+                //     int leafSum = firstPage + firstPage + 1; // Not removing last page so we don't need to worry about 7_
+                //     int totalPages = lastPage * (lastPage + 1); // 4 leaves=28; *2=56 which is 7*8, i.e. last page*(last page+1)
+                //     if (totalPages - leafSum != 15000)
+                //     {
+                //         Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(!=15K -> no soln)");
+                //     }
+                //     else
+                //     {
+                //         Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(=15K-> solution!)");
+                //         Console.ReadLine();
+                //     }
+                // }
+                // 
+                // // Blank on the first and last leaf
+                // lastPage = (leaf - 1) * 2; // see eg: 4 leaves *2=8; -1=7
+                // Console.WriteLine($"Considering book of {leaf} leaves, blank on first and last leaf, pages 1-{lastPage} (eg _1 23 45 6_)");
+                // for (int leafRemoved = 1; leafRemoved < leaf - 1; leafRemoved++)
+                // {
+                //     int firstPage = leafRemoved * 2; // first page of the removed leaf - clearly 2,4(,6...) in the eg
+                //     int leafSum = firstPage + firstPage + 1; // Not removing last page so we don't need to worry about 6_
+                //     int totalPages = lastPage * (lastPage + 1); // 4 leaves=21; *2=42 which is 6*7, i.e. last page*(last page+1)
+                //     if (totalPages - leafSum != 15000)
+                //     {
+                //         Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(!=15K -> no soln)");
+                //     }
+                //     else
+                //     {
+                //         Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(=15K-> solution!)");
+                //         Console.ReadLine();
+                //     }
+                // }
+            }
+        }
+
+        private static void test41()
+        {
+            const int MAXPAGES = 250000;
+            Console.WriteLine("Finding solutions for pages numbered [2|3], leaves numbered both sides, not removing first or last leaf");
+            // There must be at least 3 leaves in this case
+            // Each leaf contains 2 pages 12 34 56 78 etc
+            int firstFew = 10;
+            for (int numPages = 6; numPages <= MAXPAGES; numPages += 2)
+            {
+                // Calculate the sum of the pages - don't forget we are looking at the larger of the two page numbers
+                int sumPages = (numPages - 1) * numPages / 2;
+
+                // The sum of the remaining leaves is 15000 so there's no point doing anything until we get to this point
+                if (sumPages >= 15000)
+                {
+                    //if (firstFew > 0)
+                    //{
+                    //    Console.WriteLine($"{sumPages}");
+                    //    firstFew--;
+                    //}
+
+                    // So we now need to look for a page numbered from 3 to numPage-3 inclusive
+                    for (int tornPage = 3; tornPage <= numPages - 3; tornPage += 2)
+                    {
+                        int tornLeaf = tornPage + (tornPage + 1);
+
+                        // If the sum of the pages minus the tornLeaf is exactly 15000, we have a solution
+                        if (sumPages - tornLeaf == 15000)
+                        {
+                            Console.WriteLine($"Found a solution; book has {numPages} pages, and leaf numbered {tornPage} and {tornPage + 1} was removed");
+                        }
+
+                        //if (sumPages == 15051)
+                        //{
+                        //    Console.WriteLine($"The case where sumPages=={sumPages} exists");
+                        //}
+                    }
+                }
+            }
         }
 
         // Check if Random%6 is biased.  If it is then the average value over a lot of runs will be significantly
