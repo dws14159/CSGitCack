@@ -223,7 +223,30 @@ namespace CSGitCack
             // Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test41a();
+            test43();
+        }
+
+        // Does this return expected behaviour?
+        // return !Service?.Selection?.FirstOrDefault()?.checked_out ?? false;
+        // Simplify: !check ?? false;
+        // Then compare with !(check ?? false);
+        private static void test43()
+        {
+            bool? check;
+            bool result;
+
+            check = true;
+            result = !(check ?? false);
+            Console.WriteLine($"For input true, output is {result}");
+
+            check = false;
+            result = !(check ?? false);
+            Console.WriteLine($"For input false, output is {result}");
+
+            check = null;
+            result = !(check ?? false);
+            Console.WriteLine($"For input null, output is {result}");
+
         }
 
         // List triangular numbers up to MAXTN
