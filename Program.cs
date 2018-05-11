@@ -204,6 +204,37 @@ namespace CSGitCack
     }
     #endregion
 
+    #region Lock test stuff
+
+    public class LockTest1
+    {
+        //private object _lock = "lock";
+        private string _lock = "lock";
+
+        public IEnumerable<int> GetNum(object foo)
+        {
+            lock (foo)
+            {
+                yield return 1;
+                yield return 2;
+            }
+        }
+    }
+    public class LockTest2
+    {
+        //private object _lock = "lock";
+        private string _lock = "lock";
+
+        public IEnumerable<int> GetNum(object foo)
+        {
+            lock (foo)
+            {
+                yield return 1;
+                yield return 2;
+            }
+        }
+    }
+    #endregion
     class Program
     {
         static void Main(string[] args)
@@ -223,7 +254,32 @@ namespace CSGitCack
             // Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
 
-            test43();
+            test44();
+        }
+
+        // Testing behaviour of lock
+        // Expected to deadlock, but it doesn't because locks are re-entrant within the same thread.  We'd need to do something in a background thread for this to deadlock.
+        private static void test44()
+        {
+            object foo = "foo";
+            var t1 = new LockTest1().GetNum(foo).GetEnumerator();
+            var t2 = new LockTest2().GetNum(foo).GetEnumerator();
+            Console.WriteLine($"Get a number from t1: {t1.Current}");
+            t1.MoveNext();
+            Console.WriteLine($"Get a number from t2: {t2.Current}");
+            t2.MoveNext();
+            Console.WriteLine($"Get a number from t1: {t1.Current}");
+            t1.MoveNext();
+            Console.WriteLine($"Get a number from t2: {t2.Current}");
+            t2.MoveNext();
+            Console.WriteLine($"Get a number from t1: {t1.Current}");
+            t1.MoveNext();
+            Console.WriteLine($"Get a number from t2: {t2.Current}");
+            t2.MoveNext();
+            Console.WriteLine($"Get a number from t1: {t1.Current}");
+            t1.MoveNext();
+            Console.WriteLine($"Get a number from t2: {t2.Current}");
+            t2.MoveNext();
         }
 
         // Does this return expected behaviour?
