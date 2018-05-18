@@ -255,12 +255,70 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test45();
+                test46();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
+        }
+
+        // What are the chances of 3 tags clashing in a 25ms cycle? Extended to 5 cos the numbers seem wrong
+        // This seems wrong -> Found 186445 clashes out of 194481 possible cases; P(Clash)=95
+        // 00000 AAAAA BBBBB CCCCC DDDDD with 4 combinations for A, 3 for B, 2 for C, that should mean there are 24 non-clashes out of 20^4=160000 cases
+        private static void test46()
+        {
+            int PossibleCases = 0;
+            int ClashesFound = 0;
+            // Tag0 always transmits at T=0
+            for (int tag1 = 0; tag1 <= 20; tag1++)
+            {
+                for (int tag2 = 0; tag2 <= 20; tag2++)
+                {
+                    for (int tag3 = 0; tag3 <= 20; tag3++)
+                    {
+                        for (int tag4 = 0; tag4 <= 20; tag4++)
+                        {
+                            PossibleCases++;
+                            bool clash = false;
+                            // Tag1 overlaps Tag0 if it starts broadcasting at 0-4
+                            if (tag1 >= 0 && tag1 <= 4)
+                            {
+                                clash = true;
+                            }
+
+                            // Tag2 overlaps Tag0 if it starts broadcasting at 0-4
+                            if (tag2 >= 0 && tag2 <= 4)
+                            {
+                                clash = true;
+                            }
+
+                            // Tag2 overlaps Tag1 if it starts broadcasting at tag1 to tag1+4
+                            if (tag2 >= tag1 && tag2 <= tag1 + 4)
+                            {
+                                clash = true;
+                            }
+
+                            if (tag3 >= 0 && tag3 <= 4 || // Tag3 overlaps Tag0
+                                tag3 >= tag1 && tag3 <= tag1 + 4 || // Tag3 overlaps Tag1
+                                tag3 >= tag2 && tag3 <= tag2 + 4 // Tag3 overlaps Tag2
+                            )
+                                clash = true;
+
+                            if (tag4 >= 0 && tag4 <= 4 || // Tag4 overlaps Tag0
+                                tag4 >= tag1 && tag4 <= tag1 + 4 || // Tag4 overlaps Tag1
+                                tag4 >= tag2 && tag4 <= tag2 + 4 || // Tag4 overlaps Tag2
+                                tag4 >= tag3 && tag4 <= tag3 + 4 // Tag4 overlaps Tag2
+                            )
+                                clash = true;
+                            if (clash)
+                                ClashesFound++;
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine($"Found {ClashesFound} clashes out of {PossibleCases} possible cases; P(Clash)={ClashesFound*100/PossibleCases}");
         }
 
         private static void test45()
