@@ -253,8 +253,26 @@ namespace CSGitCack
             // Added AutoT4 extension
             // Console.WriteLine($"Git info [{CSGitCack.GitInfo.HeadShaShort}]");
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
+            try
+            {
+                test45();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
 
-            test44();
+        private static void test45()
+        {
+            object ServiceValue1 = 15;
+            object ServiceValue2 = null;
+            object ServiceValue3 = 0;
+            object ServiceValue4 = "Hello";
+            int param = (ServiceValue4 as int?) ?? 5;
+            //if (param == 0)
+            //    param = 5;
+            Console.WriteLine($"param = {param}");
         }
 
         // Testing behaviour of lock
