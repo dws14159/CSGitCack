@@ -339,6 +339,136 @@ namespace CSGitCack
             }
         }
 
+        private static async Task<int> test50a()
+        {
+            Console.WriteLine("Enter 50a");
+            Task<int> t = Task.Run(() =>
+            {
+                Thread.Sleep(1000);
+                var client = new HttpClient();
+                var mm = client.GetStringAsync("http://msdn.microsoft.com");
+                return 17;
+            });
+            Console.WriteLine("Before 50a await");
+            int ret = await t;
+            Console.WriteLine("Exit 50a");
+            return ret;
+        }
+        private static async Task<int> test50b()
+        {
+            Console.WriteLine("Enter 50b");
+            Task<int> t = Task.Run(() =>
+            {
+                Thread.Sleep((2000));
+                return 25;
+            });
+            Console.WriteLine("Before 50b await");
+            int ret = await t;
+            Console.WriteLine("Exit 50b");
+            return ret;
+        }
+
+        private static void test50()
+        {
+            var sw = Stopwatch.StartNew();
+            Console.WriteLine("How do we solve this with async/await?");
+            Console.WriteLine("Calling func 1");
+            var a = test50a();
+            Console.WriteLine("Calling func 2");
+            var b = test50b();
+            Console.WriteLine("Starting infinite loop");
+            for (; ; )
+            {
+                if (a.IsCompleted && b.IsCompleted)
+                    break;
+
+                Console.WriteLine("Something isn't ready yet");
+                Thread.Sleep(500);
+            }
+            //Console.WriteLine("Doing my own thing for 3000");
+            //Thread.Sleep(3000);
+            Console.WriteLine($"The sum of a({a.Result}) and b({b.Result}) is {a.Result + b.Result}");
+            Console.WriteLine($"That took {sw.ElapsedMilliseconds} ms to run");
+        }
+
+        private static async Task<int> test49a()
+        {
+            Console.WriteLine("Enter 49a");
+            Task<int> t = Task.Run(() => test48a());
+            int ret = await t;
+            Console.WriteLine("Exit 49a");
+            return ret;
+        }
+        private static async Task<int> test49b()
+        {
+            Console.WriteLine("Enter 49b");
+            Task<int> t = Task.Run(() => test48b());
+            int ret = await t;
+            Console.WriteLine("Exit 49b");
+            return ret;
+        }
+
+        private static void test49()
+        {
+            var sw = Stopwatch.StartNew();
+            Console.WriteLine("How do we solve this with async/await?");
+            Console.WriteLine("Calling func 1");
+            var a = test49a();
+            Console.WriteLine("Calling func 2");
+            var b = test49b();
+            for (; ; )
+            {
+                if (a.IsCompleted && b.IsCompleted)
+                    break;
+
+                Console.WriteLine("Something isn't ready yet");
+                Thread.Sleep(500);
+            }
+            //Console.WriteLine("Doing my own thing for 3000");
+            //Thread.Sleep(3000);
+            Console.WriteLine($"The sum of a({a.Result}) and b({b.Result}) is {a.Result + b.Result}");
+            Console.WriteLine($"That took {sw.ElapsedMilliseconds} ms to run");
+        }
+
+        private static int test48a()
+        {
+            // Long running operation 1
+            Console.WriteLine("Enter 48a");
+            Thread.Sleep(1000);
+            Console.WriteLine("Exit 48a");
+            return 17;
+        }
+
+        private static int test48b()
+        {
+            // Long running operation 2
+            Console.WriteLine("Enter 48b");
+            Thread.Sleep(2000);
+            Console.WriteLine("Exit 48b");
+            return 25;
+        }
+        private static void test48()
+        {
+            var sw = Stopwatch.StartNew();
+            Console.WriteLine("How do we solve this with async/await?");
+            Console.WriteLine("Calling func 1");
+            var a = Task.Run(() => test48a());
+            Console.WriteLine("Calling func 2");
+            var b = Task.Run(() => test48b());
+            for (; ; )
+            {
+                if (a.IsCompleted && b.IsCompleted)
+                    break;
+
+                Console.WriteLine("Something isn't ready yet");
+                Thread.Sleep(500);
+            }
+            //Console.WriteLine("Doing my own thing for 3000");
+            //Thread.Sleep(3000);
+            Console.WriteLine($"The sum of a({a.Result}) and b({b.Result}) is {a.Result + b.Result}");
+            Console.WriteLine($"That took {sw.ElapsedMilliseconds} ms to run");
+        }
+
         private static void test47a()
         {
             var cfg = new Config();
