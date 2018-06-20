@@ -339,6 +339,17 @@ namespace CSGitCack
             }
         }
 
+        private static void test51()
+        {
+            int len = 30;
+            string str = $"{len:D3}";
+            Console.WriteLine($"Length = [{str}]");
+
+            Byte[] hello = { 72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100 };
+            //string plop = new string(Encoding.ASCII.GetChars(hello, 0, 5));
+            Console.WriteLine($"hello: [{new string(Encoding.ASCII.GetChars(hello, 0, 5))}]");
+        }
+
         private static async Task<int> test50a()
         {
             Console.WriteLine("Enter 50a");
