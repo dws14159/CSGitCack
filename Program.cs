@@ -18,8 +18,12 @@ using System.Windows.Forms;
 using System.Windows.Media;
 using System.Globalization;
 using System.Data;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
 using System.Windows;
 using System.Xml;
+using System.Xml.Serialization;
 
 // UNC paths are not supported.  Defaulting to Windows directory.
 // To fix this, go to the project Properties -> Debug, change Working directory to somewhere on a local drive.
@@ -28,6 +32,7 @@ using System.Xml;
 namespace CSGitCack
 {
     #region XYstuff
+
     public class XYBase
     {
         public virtual void Speak()
@@ -43,6 +48,7 @@ namespace CSGitCack
             Console.WriteLine("XYLevel1A");
         }
     }
+
     public class XYLevel1B : XYBase
     {
         public override void Speak()
@@ -50,6 +56,7 @@ namespace CSGitCack
             Console.WriteLine("XYLevel1B");
         }
     }
+
     public class XYLevel2 : XYLevel1A
     {
         public override void Speak()
@@ -57,33 +64,41 @@ namespace CSGitCack
             Console.WriteLine("XYLevel2");
         }
     }
+
     public static class XYExtensions
     {
         public static void UpSpeak(this XYBase foo)
         {
             Console.WriteLine("XYBase UpSpeak");
         }
+
         public static void UpSpeak(this XYLevel1A foo)
         {
             Console.WriteLine("XYLevel1A UpSpeak");
         }
+
         public static void UpSpeak(this XYLevel1B foo)
         {
             Console.WriteLine("XYLevel1B UpSpeak");
         }
+
         public static void UpSpeak(this XYLevel2 foo)
         {
             Console.WriteLine("XYLevel2 UpSpeak");
         }
     }
+
     #endregion
 
     #region Clock tower event stuff
+
     public class Person
     {
         private string name;
         private ClockTower tower;
+
         private List<int> InterestedTimes;
+
         //private
         public Person(string n, ClockTower c, List<int> it)
         {
@@ -110,6 +125,7 @@ namespace CSGitCack
     }
 
     public delegate void ChimeEventHandler(object sender, ClockTowerEventArgs e);
+
     public class ClockTower
     {
         public event ChimeEventHandler Chime;
@@ -119,6 +135,7 @@ namespace CSGitCack
         {
             hours = mins = 0;
         }
+
         public int Tick()
         {
             mins++;
@@ -129,27 +146,33 @@ namespace CSGitCack
                 if (hours > 23)
                     hours = 0;
             }
+
             int ret = hours * 100 + mins;
-            Chime(this, new ClockTowerEventArgs { Time = ret });
+            Chime(this, new ClockTowerEventArgs {Time = ret});
             return ret;
         }
     }
+
     #endregion
 
     #region Z-order stuff
+
     public class ZedThing
     {
         public string message;
         public int zPos;
+
         public ZedThing(string message, int zPos)
         {
             this.message = message;
             this.zPos = zPos;
         }
     }
+
     #endregion
 
     #region test24 memleak stuff
+
     public class MemLeak
     {
         public BitmapImage ImageSourceFromFile(string myImageFile)
@@ -168,21 +191,26 @@ namespace CSGitCack
                     switch (ext)
                     {
                         case ".BMP":
-                            bd = new BmpBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                            bd = new BmpBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat,
+                                BitmapCacheOption.OnLoad);
                             break;
                         case ".GIF":
-                            bd = new GifBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                            bd = new GifBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat,
+                                BitmapCacheOption.OnLoad);
                             break;
                         case ".JPG":
                         case ".JPEG":
-                            bd = new JpegBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                            bd = new JpegBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat,
+                                BitmapCacheOption.OnLoad);
                             break;
                         case ".PNG":
-                            bd = new PngBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                            bd = new PngBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat,
+                                BitmapCacheOption.OnLoad);
                             break;
                         default:
                             throw new Exception($"Unknown file extension '{ext}'");
                     }
+
                     var png = new PngBitmapEncoder();
                     png.Frames.Add(bd.Frames[0]);
                     png.Save(ms);
@@ -192,6 +220,7 @@ namespace CSGitCack
                     image.StreamSource = ms;
                     image.EndInit();
                 }
+
                 return image;
             }
             catch (Exception ex)
@@ -202,6 +231,7 @@ namespace CSGitCack
         }
 
     }
+
     #endregion
 
     #region Lock test stuff
@@ -209,7 +239,7 @@ namespace CSGitCack
     public class LockTest1
     {
         //private object _lock = "lock";
-        private string _lock = "lock";
+        //private string _lock = "lock";
 
         public IEnumerable<int> GetNum(object foo)
         {
@@ -220,10 +250,11 @@ namespace CSGitCack
             }
         }
     }
+
     public class LockTest2
     {
         //private object _lock = "lock";
-        private string _lock = "lock";
+        //private string _lock = "lock";
 
         public IEnumerable<int> GetNum(object foo)
         {
@@ -234,8 +265,10 @@ namespace CSGitCack
             }
         }
     }
+
     #endregion
-    class Program
+
+    static class Program
     {
         static void Main(string[] args)
         {
@@ -260,6 +293,7 @@ namespace CSGitCack
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                Console.ReadLine();
             }
         }
 
@@ -318,19 +352,20 @@ namespace CSGitCack
                 }
             }
 
-            Console.WriteLine($"Found {ClashesFound} clashes out of {PossibleCases} possible cases; P(Clash)={ClashesFound*100/PossibleCases}");
+            Console.WriteLine(
+                $"Found {ClashesFound} clashes out of {PossibleCases} possible cases; P(Clash)={ClashesFound * 100 / PossibleCases}");
         }
 
         private static void test45()
         {
-            object ServiceValue1 = 15;
-            object ServiceValue2 = null;
-            object ServiceValue3 = 0;
-            object ServiceValue4 = "Hello";
-            int param = (ServiceValue4 as int?) ?? 5;
+            //object ServiceValue1 = 15;
+            //object ServiceValue2 = null;
+            //object ServiceValue3 = 0;
+            //object ServiceValue4 = "Hello";
+            //int param = (ServiceValue4 as int?) ?? 5;
             //if (param == 0)
             //    param = 5;
-            Console.WriteLine($"param = {param}");
+            //Console.WriteLine($"param = {param}");
         }
 
         // Testing behaviour of lock
@@ -407,8 +442,8 @@ namespace CSGitCack
             // In this function we consider the wider set of possibilities.  We'll work with leaves this time, starting at 4.
             // Pages could be 12 34 56 78, _1 23 45 67, 12 34 56 7_, _1 23 45 6_. Clearly some are equivalent since we can't remove first or last, but we'll check them anyway.
 
-            for (int leaf=4; leaf<=MAXLEAF; leaf++)
-            //for (int leaf = 86; leaf <= 88; leaf++) // Video solutions are 174 pages remove 112/113; 173 pages remove 25/26; 174 pages=87 leaves so we go from 85 to 89
+            for (int leaf = 4; leaf <= MAXLEAF; leaf++)
+                //for (int leaf = 86; leaf <= 88; leaf++) // Video solutions are 174 pages remove 112/113; 173 pages remove 25/26; 174 pages=87 leaves so we go from 85 to 89
             {
                 // Reducing duplicate code
                 for (int leafRemoved = 1; leafRemoved < leaf - 1; leafRemoved++)
@@ -436,14 +471,16 @@ namespace CSGitCack
                             case 2:
                                 // Blank on the last leaf
                                 eg = "12 34 56 7_";
-                                firstPage = leafRemoved * 2 + 1; // first page of the removed leaf - clearly 3,5,7 in the eg
+                                firstPage = leafRemoved * 2 +
+                                            1; // first page of the removed leaf - clearly 3,5,7 in the eg
                                 lastPage = leaf * 2 - 1; // see eg: 4 leaves *2=8; -1=7
                                 break;
 
                             case 3:
                                 // Blank on the first and last leaf
                                 eg = "_1 23 45 6_";
-                                firstPage = leafRemoved * 2; // first page of the removed leaf - clearly 2,4(,6...) in the eg
+                                firstPage = leafRemoved *
+                                            2; // first page of the removed leaf - clearly 2,4(,6...) in the eg
                                 lastPage = (leaf - 1) * 2; // see eg: 4 leaves *2=8; -1=7
                                 break;
                         }
@@ -456,11 +493,13 @@ namespace CSGitCack
                         }
                         else
                         {
-                            Console.WriteLine($"Removing leaf {leafRemoved} of {leaf} (blanks:{eg}) containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(=15K-> solution!)");
+                            Console.WriteLine(
+                                $"Removing leaf {leafRemoved} of {leaf} (blanks:{eg}) containing pages {firstPage} and {firstPage + 1}; page sum decreases from {totalPages} to {totalPages - leafSum}(=15K-> solution!)");
                             // Console.ReadLine();
                         }
                     }
                 }
+
                 // //~~~~~~~
                 // // No blanks
                 // int lastPage = leaf * 2; // last page of the book
@@ -543,10 +582,11 @@ namespace CSGitCack
         private static void test41()
         {
             const int MAXPAGES = 250000;
-            Console.WriteLine("Finding solutions for pages numbered [2|3], leaves numbered both sides, not removing first or last leaf");
+            Console.WriteLine(
+                "Finding solutions for pages numbered [2|3], leaves numbered both sides, not removing first or last leaf");
             // There must be at least 3 leaves in this case
             // Each leaf contains 2 pages 12 34 56 78 etc
-            int firstFew = 10;
+            //int firstFew = 10;
             for (int numPages = 6; numPages <= MAXPAGES; numPages += 2)
             {
                 // Calculate the sum of the pages - don't forget we are looking at the larger of the two page numbers
@@ -569,7 +609,8 @@ namespace CSGitCack
                         // If the sum of the pages minus the tornLeaf is exactly 15000, we have a solution
                         if (sumPages - tornLeaf == 15000)
                         {
-                            Console.WriteLine($"Found a solution; book has {numPages} pages, and leaf numbered {tornPage} and {tornPage + 1} was removed");
+                            Console.WriteLine(
+                                $"Found a solution; book has {numPages} pages, and leaf numbered {tornPage} and {tornPage + 1} was removed");
                         }
 
                         //if (sumPages == 15051)
@@ -587,11 +628,11 @@ namespace CSGitCack
         {
             var RNG = new Random();
             int total = 0, count = 0;
-            while (count<5000)
+            while (count < 5000)
             {
                 int num = RNG.Next() % 6;
                 total += num;
-                double average = (double)total / (double)count;
+                double average = (double) total / (double) count;
                 count++;
                 Console.WriteLine($"num={num}; total={total}; count={count}; average={average}");
                 //total += RNG.Next() % 6;
@@ -637,7 +678,7 @@ namespace CSGitCack
         {
             string inputBinary = "1001011";
             int ix = 1;
-            bool done=false;
+            bool done = false;
             bool div3 = false;
             string partial = $"{inputBinary[0]}";
             while (!done)
@@ -666,6 +707,7 @@ namespace CSGitCack
                         partial = "10";
                         break;
                 }
+
                 // get next bit
                 if (ix < inputBinary.Length)
                 {
@@ -675,17 +717,25 @@ namespace CSGitCack
                 else
                     done = true;
             }
-            Console.WriteLine(div3 ? $"inputBinary[{inputBinary}] is divisible by 3" : $"inputBinary[{inputBinary}] is not divisible by 3");
+
+            Console.WriteLine(div3
+                ? $"inputBinary[{inputBinary}] is divisible by 3"
+                : $"inputBinary[{inputBinary}] is not divisible by 3");
         }
 
         private static void test36()
         {
-            string[] fields ={
-                "dmDeviceName","dmSpecVersion","dmDriverVersion","dmSize","dmDriverExtra","dmFields","dmOrientation",
-"dmPaperSize","dmPaperLength","dmPaperWidth","dmScale","dmCopies","dmDefaultSource","dmPrintQuality",
-"dmColor","dmDuplex","dmYResolution","dmTTOption","dmCollate","dmFormName","dmLogPixels","dmBitsPerPel",
-"dmPelsWidth","dmPelsHeight","dmDisplayFlags","dmDisplayFrequency","dmICMMethod","dmICMIntent","dmMediaType",
-"dmDitherType","dmICCManufacturer","dmICCModel","dmPanningWidth","dmPanningHeight"
+            string[] fields =
+            {
+                "dmDeviceName", "dmSpecVersion", "dmDriverVersion", "dmSize", "dmDriverExtra", "dmFields",
+                "dmOrientation",
+                "dmPaperSize", "dmPaperLength", "dmPaperWidth", "dmScale", "dmCopies", "dmDefaultSource",
+                "dmPrintQuality",
+                "dmColor", "dmDuplex", "dmYResolution", "dmTTOption", "dmCollate", "dmFormName", "dmLogPixels",
+                "dmBitsPerPel",
+                "dmPelsWidth", "dmPelsHeight", "dmDisplayFlags", "dmDisplayFrequency", "dmICMMethod", "dmICMIntent",
+                "dmMediaType",
+                "dmDitherType", "dmICCManufacturer", "dmICCModel", "dmPanningWidth", "dmPanningHeight"
             };
             string doll = "$";
             string quot = "\"";
@@ -694,7 +744,8 @@ namespace CSGitCack
             foreach (var s in fields)
             {
                 Console.WriteLine($"if (mode1.{s} != mode2.{s})");
-                Console.WriteLine($"Console.WriteLine({doll}{quot}{s} changed from [{brco}mode1.{s}{brcc}] to [{brco}mode2.{s}{brcc}]{quot});");
+                Console.WriteLine(
+                    $"Console.WriteLine({doll}{quot}{s} changed from [{brco}mode1.{s}{brcc}] to [{brco}mode2.{s}{brcc}]{quot});");
 
                 // if (mode1.dmDeviceName != mode2.dmDeviceName)
                 // Console.WriteLine($"dmDeviceName changed from [{mode1.dmDeviceName}] to [{mode2.dmDeviceName}]");
@@ -728,7 +779,7 @@ namespace CSGitCack
                 var isNetworkPrinter = printer.GetPropertyValue("Network");
 
                 Console.WriteLine("{0} (Status: {1}, Default: {2}, Network: {3}",
-                            name, status, isDefault, isNetworkPrinter);
+                    name, status, isDefault, isNetworkPrinter);
                 foreach (var pp in printer.Properties)
                 {
                     Console.WriteLine($"- Property name [{pp.Name}] Value [{pp.Value}]");
@@ -823,6 +874,7 @@ namespace CSGitCack
                 row["ParentItem"] = "ParentItem " + i;
                 table.Rows.Add(row);
             }
+
             table.AcceptChanges();
             DataTable table2 = table.Copy();
             Console.WriteLine("Blat!");
@@ -832,16 +884,20 @@ namespace CSGitCack
         private static void test29()
         {
             string test = "Hello-" +
-                "There-" +
-                "Everyone";
+                          "There-" +
+                          "Everyone";
             Console.WriteLine(test);
         }
+
         // Base 64 encode a named file
         private static void test28()
         {
-            string[] fileNames = {"Laser_Charles_Wright.ttf", "LaserCW_MB.ttf", "LaserCW_MB_3D.ttf", "Laser_Charles_Wright_3D.ttf",
+            string[] fileNames =
+            {
+                "Laser_Charles_Wright.ttf", "LaserCW_MB.ttf", "LaserCW_MB_3D.ttf", "Laser_Charles_Wright_3D.ttf",
                 "Laser_Charles_Wright_Inline.ttf", "Laser_Charles_Wright_MC.ttf", "Laser_Charles_Wright_MC_3D.ttf",
-                "Laser_Charles_Wright_MC_HL.ttf", "Laser_France.ttf", "Laser_IRL.ttf", "Laser_UK79.ttf"};
+                "Laser_Charles_Wright_MC_HL.ttf", "Laser_France.ttf", "Laser_IRL.ttf", "Laser_UK79.ttf"
+            };
             foreach (var fn in fileNames)
             {
                 string fnNoExt = fn.Replace(".ttf", "");
@@ -864,6 +920,7 @@ namespace CSGitCack
                         count = 0;
                     }
                 }
+
                 Console.WriteLine("\";\n");
                 // Console.WriteLine($"Lines: {lines}; Characters: {chars}");
             }
@@ -873,7 +930,8 @@ namespace CSGitCack
         private static void test27()
         {
             var foo = new Uri("pack://application:,,,/");
-            var ff = new System.Windows.Media.FontFamily(new Uri("pack://application:,,,/"), "./resources/#Laser Charles Wright");
+            var ff = new System.Windows.Media.FontFamily(new Uri("pack://application:,,,/"),
+                "./resources/#Laser Charles Wright");
             //new System.Windows.Media.FontFamily(new Uri("pack://application:,,,/"), "./resources/#Laser Charles Wright");
         }
 
@@ -890,10 +948,15 @@ namespace CSGitCack
 
             Console.WriteLine($"'{strLaser}' installed: [{instLaser}]; '{strWibble}' installed: [{instWibble}]");
         }
+
         // test25: What does GetTextGeometryAndFormatting do if the text is empty?
         // Ans: Bounds.Width=-Inf.  Bounds.Width < 20 returns TRUE.
+
         #region GetTextGeometryAndFormatting
-        static void GetTextGeometryAndFormatting(string Text, string Font, double FontSize, bool Italics, bool Bold, System.Windows.Point Location, System.Windows.Media.Color Colour, out Geometry geom, out FormattedText ft, out System.Windows.Point whitespace)
+
+        static void GetTextGeometryAndFormatting(string Text, string Font, double FontSize, bool Italics, bool Bold,
+            System.Windows.Point Location, System.Windows.Media.Color Colour, out Geometry geom, out FormattedText ft,
+            out System.Windows.Point whitespace)
         {
             var tf = new Typeface(new System.Windows.Media.FontFamily(Font),
                 Italics ? FontStyles.Italic : FontStyles.Normal,
@@ -908,8 +971,10 @@ namespace CSGitCack
             {
                 br1.Color = System.Windows.Media.Color.FromArgb(255, 0, 0, 0);
             }
+
             string measureString = Text;
-            ft = new FormattedText(measureString, CultureInfo.InvariantCulture, System.Windows.FlowDirection.LeftToRight, tf, FontSize, br1);
+            ft = new FormattedText(measureString, CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight, tf, FontSize, br1);
 
             // Problem is: we don't know what the space dimensions are.  So if we draw it at 0,0, then the bounding rectangle will start at x,y which indicates the space dimension.
             var geom1 = ft.BuildGeometry(new System.Windows.Point(0, 0));
@@ -917,19 +982,24 @@ namespace CSGitCack
 
             // Rebuild the geometry to discard the whitespace and offset by this.(x,y), because for general use elsewhere we want geom.Bounds to indicate the drawn text area
             whitespace = geom1.Bounds.TopLeft; // draw however still needs to be able to take this into account
-            System.Windows.Point offset = new System.Windows.Point(whitespace.X * -1 + Location.X, whitespace.Y * -1 + Location.Y);
+            System.Windows.Point offset =
+                new System.Windows.Point(whitespace.X * -1 + Location.X, whitespace.Y * -1 + Location.Y);
             geom = ft.BuildGeometry(offset);
         }
+
         #endregion
+
         private static void test25()
         {
             Geometry geom;
             FormattedText ft;
             System.Windows.Point whitespace;
             string testStr = "";
-            GetTextGeometryAndFormatting(testStr, "Arial", 12, false, false, new System.Windows.Point(0, 0), System.Windows.Media.Colors.Black, out geom, out ft, out whitespace);
+            GetTextGeometryAndFormatting(testStr, "Arial", 12, false, false, new System.Windows.Point(0, 0),
+                System.Windows.Media.Colors.Black, out geom, out ft, out whitespace);
             Console.WriteLine($"Width of test string '{testStr}' is {geom.Bounds.Width}");
-            Console.WriteLine($"So is this smaller than a rectangle of width 20? [{(geom.Bounds.Width<20).ToString()}]");
+            Console.WriteLine(
+                $"So is this smaller than a rectangle of width 20? [{(geom.Bounds.Width < 20).ToString()}]");
         }
 
         private static void test24()
@@ -938,17 +1008,17 @@ namespace CSGitCack
             // - select a random *.png filename from C:\Users\Public\Documents\CCL\lgsystems\Badges
             // - load it with MemLeak.ImageSourceFromFile
             var mem = new MemLeak();
-            Random rnd = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
+            Random rnd = new Random((int) DateTime.Now.Ticks & 0x0000FFFF);
             var files = Directory.GetFiles("C:\\Users\\Public\\Documents\\CCL\\lgsystems\\Badges");
             int count = 0;
             for (;;)
             {
                 string file = files[rnd.Next(files.Length)];
-                if (Path.GetExtension(file)==".png")
+                if (Path.GetExtension(file) == ".png")
                 {
                     var img = mem.ImageSourceFromFile(file);
                     count++;
-                    if (count>99)
+                    if (count > 99)
                     {
                         count = 0;
                         Console.Write(".");
@@ -984,16 +1054,16 @@ namespace CSGitCack
 
             int lines = 0;
             int count = 1;
-            for (int i=0; i<6561; i++)
+            for (int i = 0; i < 6561; i++)
             {
                 int t = i;
                 string op = "";
                 string mask = "";
-                for (int j=0; j<8; j++)
+                for (int j = 0; j < 8; j++)
                 {
                     char c = '.';
                     char m = '.';
-                    switch (t%3)
+                    switch (t % 3)
                     {
                         case 1:
                             c = 'I';
@@ -1004,10 +1074,12 @@ namespace CSGitCack
                             m = 'N';
                             break;
                     }
+
                     op += c;
                     mask += m;
                     t /= 3;
                 }
+
                 if (ValidMasks.Contains(mask))
                 {
                     Console.Write($"{op} {count} ");
@@ -1017,7 +1089,7 @@ namespace CSGitCack
                     op = op.Replace('.', ' ').Trim();
                     op += ' ';
                     int which = 0;
-                    int[] len = { 0, 0 };
+                    int[] len = {0, 0};
                     for (int k = 0; k < op.Length - 1; k++)
                     {
                         switch (op[k])
@@ -1041,15 +1113,17 @@ namespace CSGitCack
                                 break;
                         }
                     }
-                    Console.WriteLine($"Lengths=[{len[0]}, {len[1]}] Sum=[{len[0]+len[1]}]");
+
+                    Console.WriteLine($"Lengths=[{len[0]}, {len[1]}] Sum=[{len[0] + len[1]}]");
                     bool gotIt = false;
                     foreach (var v in DistinctLengths)
                     {
                         if (v[0] == len[0] && v[1] == len[1])
                             gotIt = true;
                     }
+
                     if (!gotIt)
-                        DistinctLengths.Add(new int[] { len[0], len[1] });
+                        DistinctLengths.Add(new int[] {len[0], len[1]});
                     if (lines > 40)
                     {
                         //Console.Read();
@@ -1057,11 +1131,13 @@ namespace CSGitCack
                     }
                 }
             }
+
             Console.WriteLine("Distinct lengths:");
             foreach (var v1 in DistinctLengths)
             {
                 Console.WriteLine($"{v1[0]} {v1[1]}");
             }
+
             Console.WriteLine("End");
         }
 
@@ -1075,8 +1151,8 @@ namespace CSGitCack
         private static void test21()
         {
             bool equal = true;
-            byte[] a = { 1, 2, 3, 4, 5 };
-            byte[] b = { 1, 2, 3, 4, 5 };
+            byte[] a = {1, 2, 3, 4, 5};
+            byte[] b = {1, 2, 3, 4, 5};
             if (a.Length != b.Length)
                 equal = false;
             for (int len = 0; len < a.Length && equal == true; len++)
@@ -1088,18 +1164,21 @@ namespace CSGitCack
             Console.WriteLine(a == b ? "Arrays are equal" : "Arrays are not equal");
         }
 
-        static int[] primes = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97 };
+        static int[] primes =
+            {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97};
 
         static int nextPrime(int p)
         {
-            for (int i=0; i<primes.Count()-1; i++)
+            for (int i = 0; i < primes.Count() - 1; i++)
             {
                 if (primes[i] == p)
                     return primes[i + 1];
             }
+
             Console.WriteLine($"nextPrime({p}) couldn't return a value");
             return 0;
         }
+
         static bool isPrime(int p)
         {
             foreach (var v in primes)
@@ -1107,8 +1186,10 @@ namespace CSGitCack
                 if (p == v)
                     return true;
             }
+
             return false;
         }
+
         // Brute force solver for https://puzzling.stackexchange.com/questions/56369/how-many-coins-did-mrs-jones-have
         private static void test20()
         {
@@ -1116,7 +1197,9 @@ namespace CSGitCack
             {
                 if (isPrime(lisaAge))
                 {
-                    for (int jackAge = lisaAge + 2; jackAge < 43; jackAge++) // Lisa is "the teenager" so Jack and Amy must be at least 23
+                    for (int jackAge = lisaAge + 2;
+                        jackAge < 43;
+                        jackAge++) // Lisa is "the teenager" so Jack and Amy must be at least 23
                     {
                         if (isPrime(jackAge) && jackAge == nextPrime(lisaAge))
                         {
@@ -1125,32 +1208,38 @@ namespace CSGitCack
                                 if (isPrime(amyAge) && amyAge == nextPrime(jackAge))
                                 {
                                     Console.WriteLine($"Testing ages L:{lisaAge},J:{jackAge},A:{amyAge}");
-                                    for (int month=1; month<=12; month++)
+                                    for (int month = 1; month <= 12; month++)
                                     {
                                         if (isPrime(month))
                                         {
-                                            for (int lisaDay=1; lisaDay<=31; lisaDay++)
+                                            for (int lisaDay = 1; lisaDay <= 31; lisaDay++)
                                             {
                                                 if (isPrime(lisaDay))
                                                 {
-                                                    for (int jackDay=1; jackDay<=31; jackDay++)
+                                                    for (int jackDay = 1; jackDay <= 31; jackDay++)
                                                     {
                                                         if (isPrime(jackDay))
                                                         {
-                                                            for (int amyDay=1; amyDay<=31; amyDay++)
+                                                            for (int amyDay = 1; amyDay <= 31; amyDay++)
                                                             {
                                                                 if (isPrime(amyDay))
                                                                 {
                                                                     int lisaCoins = lisaAge + month + lisaDay;
                                                                     int jackCoins = jackAge + month + jackDay;
                                                                     int amyCoins = amyAge + month + amyDay;
-                                                                    if (isPrime(lisaCoins) && isPrime(jackCoins) && isPrime(amyCoins) && isPrime(lisaCoins+jackCoins+amyCoins))
+                                                                    if (isPrime(lisaCoins) && isPrime(jackCoins) &&
+                                                                        isPrime(amyCoins) &&
+                                                                        isPrime(lisaCoins + jackCoins + amyCoins))
                                                                     {
-                                                                        if (lisaCoins > jackCoins && lisaCoins > amyCoins)
+                                                                        if (lisaCoins > jackCoins &&
+                                                                            lisaCoins > amyCoins)
                                                                         {
-                                                                            if (!(lisaCoins == jackCoins || lisaCoins == amyCoins || jackCoins == amyCoins))
+                                                                            if (!(lisaCoins == jackCoins ||
+                                                                                  lisaCoins == amyCoins ||
+                                                                                  jackCoins == amyCoins))
                                                                             {
-                                                                                Console.WriteLine($"Got possible solution: month={month}, days are L:{lisaDay},J:{jackDay},A:{amyDay}, coins are L:{lisaCoins},J:{jackCoins},A:{amyCoins}, total coins={lisaCoins + jackCoins + amyCoins}");
+                                                                                Console.WriteLine(
+                                                                                    $"Got possible solution: month={month}, days are L:{lisaDay},J:{jackDay},A:{amyDay}, coins are L:{lisaCoins},J:{jackCoins},A:{amyCoins}, total coins={lisaCoins + jackCoins + amyCoins}");
                                                                                 //Console.ReadLine();
                                                                             }
                                                                         }
@@ -1174,7 +1263,7 @@ namespace CSGitCack
         // Restrict a value using min/max
         private static void test19()
         {
-            for (int i=0; i<10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 int least = 2, most = 8;
                 int disp = Math.Min(Math.Max(i, least), most);
@@ -1198,6 +1287,7 @@ namespace CSGitCack
             {
                 Console.Write(v.message);
             }
+
             Console.WriteLine("");
         }
 
@@ -1208,19 +1298,20 @@ namespace CSGitCack
         {
             var sw = new Stopwatch();
             sw.Start();
-            for (int i=0; i<1000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 if ((i % 50) == 0)
                     Console.Write(i);
                 string foo = "Hello Bob ";
-                for (int j=0; j<10000; j++)
+                for (int j = 0; j < 10000; j++)
                 {
                     foo += "and Bob";
-                    if ((i%50)==0)
-                        if ((j%2000)==0)
+                    if ((i % 50) == 0)
+                        if ((j % 2000) == 0)
                             Console.Write(".");
                 }
             }
+
             Console.WriteLine($"string test took {sw.ElapsedMilliseconds} ms");
             sw.Reset();
             sw.Start();
@@ -1237,6 +1328,7 @@ namespace CSGitCack
                             Console.Write(".");
                 }
             }
+
             Console.WriteLine($"StringBuilder test took {sw.ElapsedMilliseconds} ms");
         }
 
@@ -1255,9 +1347,9 @@ namespace CSGitCack
         private static void test15()
         {
             var t = new ClockTower();
-            var john = new Person("John", t, new List<int> { 1030, 1215, 1727 });
-            var sarah = new Person("Sarah", t, new List<int> { 1000, 1300, 1630 });
-            var abdul = new Person("Abdul", t, new List<int> { 725, 1025, 1325, 1625, 1925 });
+            var john = new Person("John", t, new List<int> {1030, 1215, 1727});
+            var sarah = new Person("Sarah", t, new List<int> {1000, 1300, 1630});
+            var abdul = new Person("Abdul", t, new List<int> {725, 1025, 1325, 1625, 1925});
             for (int i = 0; i < 24 * 60; i++)
             {
                 int ticks = t.Tick();
@@ -1302,19 +1394,20 @@ namespace CSGitCack
         private static void test13()
         {
             string fileName = "";
-            for (int i = 0; ; i++)
+            for (int i = 0;; i++)
             {
                 fileName = String.Format("Z:\\Autogen {0:000}.lgxp", i);
                 if (!File.Exists(fileName))
                     break;
             }
+
             Console.WriteLine($"File '{fileName}' doesn't exist");
         }
 
         private static void test12()
         {
-            String[] ss = { "\nA\n", "  B  ", "\nC  " };
-            char[] TrimChars = { ' ', '\r', '\n', '\t' };
+            String[] ss = {"\nA\n", "  B  ", "\nC  "};
+            char[] TrimChars = {' ', '\r', '\n', '\t'};
             //foreach(char c in TrimChars)
             //{
             //    Console.WriteLine(Char.IsWhiteSpace(c) ? "TRUE" : "FALSE");
@@ -1347,6 +1440,7 @@ namespace CSGitCack
             foo(y: ++a, x: --a);
             foo(x: ++a, y: --a);
         }
+
         private static void test9()
         {
             RectangleF Bound = new RectangleF(0, 0, 200, 150);
@@ -1357,6 +1451,7 @@ namespace CSGitCack
             Console.WriteLine($"Inflate by {infX} {infY}");
             Console.WriteLine($"MarginLRTB = '{Margin.Left} {Margin.Right} {Margin.Top} {Margin.Bottom}'");
         }
+
         private static void test8()
         {
             string s = "     Hello";
@@ -1366,15 +1461,16 @@ namespace CSGitCack
 
         private static object GetAnonThing()
         {
-            return new { Shop = "Tesco", Age = 27 };
+            return new {Shop = "Tesco", Age = 27};
         }
+
         private static void test7()
         {
             //object o = null;
             object o = GetAnonThing();
 
-            string s = (string)o?.GetType().GetProperty("Name")?.GetValue(o, null);
-            int a = (int?)o?.GetType().GetProperty("Age")?.GetValue(o, null) ?? 0;
+            string s = (string) o?.GetType().GetProperty("Name")?.GetValue(o, null);
+            int a = (int?) o?.GetType().GetProperty("Age")?.GetValue(o, null) ?? 0;
             Console.WriteLine($"Name:{s} Age:{a}");
         }
 
@@ -1427,9 +1523,11 @@ namespace CSGitCack
                         }
                     }
                 }
+
                 Console.WriteLine($"Ending string  : [{outLine}]");
                 sw.WriteLine(outLine);
             }
+
             sw.Close();
             of.Close();
         }
@@ -1442,17 +1540,21 @@ namespace CSGitCack
                 string str = Console.ReadLine();
                 using (var sha1 = new SHA1Managed())
                 {
-                    Console.WriteLine($"The hash of '{str}' is '{BitConverter.ToString(sha1.ComputeHash(Encoding.UTF8.GetBytes(str))).Replace("-","")}'");
+                    Console.WriteLine(
+                        $"The hash of '{str}' is '{BitConverter.ToString(sha1.ComputeHash(Encoding.UTF8.GetBytes(str))).Replace("-", "")}'");
                 }
             }
         }
 
         private static void test4()
         {
-            Random r = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
-            string[] Layouts = {"AA11 AAA","B111 AAA","B11 AAA","B2 AAA","AAA 2B","AAA 11B","AAA 211B","2111 AA","2111B",
-                    "2B","2AA","2AAA","21B","21AA","21AAA","211B","211 AA","211 AAA","B111","AA 111","AAA 111",
-                    "B11","AA11","AAA 111","B2","B11","B111","B1111","AA 1111","AAA 1111","2111 AAA"};
+            Random r = new Random((int) DateTime.Now.Ticks & 0x0000FFFF);
+            string[] Layouts =
+            {
+                "AA11 AAA", "B111 AAA", "B11 AAA", "B2 AAA", "AAA 2B", "AAA 11B", "AAA 211B", "2111 AA", "2111B",
+                "2B", "2AA", "2AAA", "21B", "21AA", "21AAA", "211B", "211 AA", "211 AAA", "B111", "AA 111", "AAA 111",
+                "B11", "AA11", "AAA 111", "B2", "B11", "B111", "B1111", "AA 1111", "AAA 1111", "2111 AAA"
+            };
             string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             string charsNoOIZU = "ABCDEFGHJKLMNPQRSTVWXY";
             string digits = "0123456789";
@@ -1488,9 +1590,11 @@ namespace CSGitCack
                             break;
                     }
                 }
+
                 if (i < 49)
                     newplates += ',';
             }
+
             Console.WriteLine(newplates);
         }
 
@@ -1501,6 +1605,7 @@ namespace CSGitCack
             {
                 teststr += Convert.ToChar(i);
             }
+
             Console.WriteLine(teststr);
         }
 
