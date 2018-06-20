@@ -268,6 +268,48 @@ namespace CSGitCack
 
     #endregion
 
+    public class EndPointInfo
+    {
+        public string IPAddr { get; set; }
+        public int Port { get; set; }
+    }
+
+    public class ReaderInfo
+    {
+        public EndPointInfo EndPoint { get; set; }
+        public string FriendlyName { get; set; }
+    }
+
+    public class TagFriendlyName
+    {
+        public string TagID { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class ZoneInfo
+    {
+        public string Name { get; set; }
+        public string OverlayImage { get; set; }
+        public List<ReaderInfo> Readers { get; set; }
+    }
+
+    public class Config
+    {
+        public string FileVersion = "DrillRigDemo Config V1.0";
+        [XmlIgnore]
+        public bool LoadOK;
+        public List<ZoneInfo> ZonesInfo { get; set; } = new List<ZoneInfo>();
+        //public List<TagFriendlyName> TagFriendlyNames { get; set; } = new List<TagFriendlyName>();
+        //public List<string> TagsSeen { get; set; } = new List<string>();
+        //public string BackgroundImage { get; set; }
+        //public List<string> OverlayFiles { get; set; } = new List<string>();
+
+        private string GetPath()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DrillRigDemo.xml");
+        }
+    }
+
     static class Program
     {
         static void Main(string[] args)
@@ -288,7 +330,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test46();
+                test47();
             }
             catch (Exception e)
             {
@@ -296,6 +338,79 @@ namespace CSGitCack
                 Console.ReadLine();
             }
         }
+
+        private static void test47a()
+        {
+            var cfg = new Config();
+            string MyDocs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var ser = new XmlSerializer(typeof(Config));
+            var inputFile = Path.Combine(MyDocs, "DrillRigDemo.xml");
+            using (var reader = new StreamReader(inputFile))
+            {
+                cfg = (Config)ser.Deserialize(reader);
+                Debugger.Break(); // rather than loads of Console.WriteLine junk, just inspect it in the debugger
+            }
+        }
+
+        private static void test47()
+        {
+            Console.WriteLine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "DrillRigDemo.xml"));
+            string MyDocs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            for (int i = 0; i < 2; i++)
+            {
+                var cfg = new Config();
+                cfg.ZonesInfo.Add(new ZoneInfo()
+                {
+                    Name = "Zone1",
+                    OverlayImage = Path.Combine(MyDocs, "DS Zone1 overlay.png"),
+                    Readers = new List<ReaderInfo>()
+                    {
+                        new ReaderInfo()
+                        {
+                            FriendlyName = "Zone 1 near window",
+                            EndPoint = new EndPointInfo() {IPAddr = "192.168.1.124", Port = 6101}
+                        },
+                        new ReaderInfo()
+                        {
+                            FriendlyName = "Zone 1 above entry door",
+                            EndPoint = new EndPointInfo() {IPAddr = "192.168.1.124", Port = 6102}
+                        }
+                    }
+                });
+                cfg.ZonesInfo.Add(new ZoneInfo()
+                {
+                    Name = "Zone2",
+                    OverlayImage = Path.Combine(MyDocs, "DS Zone2 overlay.png"),
+                    Readers = new List<ReaderInfo>()
+                    {
+                        new ReaderInfo()
+                        {
+                            FriendlyName = "Zone 2 ceiling",
+                            EndPoint = new EndPointInfo() {IPAddr = "192.168.1.124", Port = 6103}
+                        }
+                    }
+                });
+                //cfg.TagFriendlyNames.Add(new TagFriendlyName() {TagID = "5333494430303031", Name = "S3ID0001"});
+                //cfg.TagFriendlyNames.Add(new TagFriendlyName() {TagID = "5333494430303032", Name = "S3ID0002"});
+                //cfg.TagsSeen.Add("5333494430303031");
+                //cfg.TagsSeen.Add("5333494430303032");
+                //cfg.TagsSeen.Add("5333494430303033");
+                //cfg.TagsSeen.Add("5333494430303034");
+                //cfg.BackgroundImage = Path.Combine(MyDocs, "DS Roughneck Schematics.png");
+                //cfg.OverlayFiles.Add(Path.Combine(MyDocs, "DS Zone1 overlay.png"));
+                //cfg.OverlayFiles.Add(Path.Combine(MyDocs, "DS Zone2 overlay.png"));
+
+                var ser = new XmlSerializer(typeof(Config));
+                var outputFile = Path.Combine(MyDocs, "DrillRigDemo.xml");
+                using (var writer = new FileStream(outputFile, FileMode.Create))
+                {
+                    ser.Serialize(writer, cfg);
+                }
+            }
+        }
+
 
         // What are the chances of 3 tags clashing in a 25ms cycle? Extended to 5 cos the numbers seem wrong
         // This seems wrong -> Found 186445 clashes out of 194481 possible cases; P(Clash)=95
