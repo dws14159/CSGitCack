@@ -330,7 +330,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test47();
+                test52();
             }
             catch (Exception e)
             {
@@ -339,6 +339,27 @@ namespace CSGitCack
             }
         }
 
+        // Access to modified closure?
+        // public delegate void ClosureEventHandler(object sender, EventArgs e);
+        // public static event ClosureEventHandler ev1;
+        // Chime(this, new ClockTowerEventArgs {Time = ret});
+        private static void test52()
+        {
+            var nums = new List<string>() {"One", "Two", "Three"};
+            var acts = new List<Action>();
+            // foreach (var num in nums)
+            // {
+            //     acts.Add(delegate { Console.WriteLine(num); });
+            // }
+            for (int i = 0; i < nums.Count; i++)
+            {
+                acts.Add(delegate { Console.WriteLine(nums[i]); });
+                // acts.Add(delegate  "{ Console.WriteLine(nums[i]); }"  );
+            }
+            // ev1.Invoke("foo", new EventArgs());
+            // Console.WriteLine($"i={i}"); // error CS0103: The name 'i' does not exist in the current context
+            acts[0](); // System.ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection.
+        }
         private static void test51()
         {
             int len = 30;
