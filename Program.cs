@@ -330,13 +330,27 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test52();
+                test53();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.ReadLine();
             }
+        }
+
+        // Type cast is redundant? Really?
+        private static void test53()
+        {
+            int a = 5;
+            int b = 2;
+            double c = (double)a / (double)b; // R# says cast is redundant but we get the right result 2.5
+            double d = (double) a / b; // No R# whinge; 2.5
+            double e = a / (double) b; // No R# whinge; 2.5
+            double f = a / b; // No R# whinge, "Possible loss of fraction" prob from VS; result 2
+            double g = (double) (a / b); // No R# whinge, "Possible loss of fraction" prob from VS; result 2
+            Console.WriteLine($"a[{a}] / b[{b}] = c[{c}], d[{d}], e[{e}], f[{f}], g[{g}]");
+            // Result: a[5] / b[2] = c[2.5], d[2.5], e[2.5], f[2], g[2]
         }
 
         // Access to modified closure?
