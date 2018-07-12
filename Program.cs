@@ -449,7 +449,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test54();
+                test55();
             }
             catch (Exception e)
             {
@@ -457,6 +457,54 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        // Why is a DataRowCollection a collection of object not a collection of DataRow?
+        // Answer: https://stackoverflow.com/a/2325792/5937167
+        private static void test55()
+        {
+            // Create new DataTable.
+            DataTable table = new DataTable();
+
+            // Declare DataColumn and DataRow variables.
+
+            // Create new DataColumn, set DataType, ColumnName
+            // and add to DataTable.    
+            var column = new DataColumn
+            {
+                DataType = System.Type.GetType("System.Int32"),
+                ColumnName = "id"
+            };
+            table.Columns.Add(column);
+
+            // Create second column.
+            column = new DataColumn
+            {
+                DataType = Type.GetType("System.String"),
+                ColumnName = "item"
+            };
+            table.Columns.Add(column);
+
+            // Create new DataRow objects and add to DataTable.    
+            for (int i = 0; i < 10; i++)
+            {
+                var row = table.NewRow();
+                row["id"] = i;
+                row["item"] = "item " + i;
+                table.Rows.Add(row);
+            }
+
+            foreach (DataRow row in table.Rows)
+            {
+                Console.WriteLine($"id=[{(row["id"])}]; item=[{(row["item"])}]");
+            }
+
+            // foreach (var row in table.Rows)
+            // {
+            //     Console.WriteLine($"id=[{row["id"]}]; item=[{row["item"]}]");
+            //     //                       ~~~~~~~~~           ~~~~~~~~~~~
+            //     // Cannot apply indexing with [] to an expression of type 'object'
+            // }
         }
 
         private static void test54a()
