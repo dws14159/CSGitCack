@@ -310,6 +310,125 @@ namespace CSGitCack
         }
     }
 
+    public class Transform
+    {
+        [XmlElement(Order = 1)]
+        public string DestTables;
+        [XmlElement(Order = 2)]
+        public string QueryText;
+        [XmlArray(Order = 3)]
+        [XmlArrayItem(ElementName = "Task")]
+        public List<string> TaskList;
+    }
+    public class DataSource
+    {
+        [XmlElement(Order = 1)]
+        public string ConnectionString;
+        [XmlElement(Order = 2)]
+        public List<Transform> Transformation;
+    }
+
+    public class LTWSConfig
+    {
+        [XmlElement(Order = 1)]
+        public string FileVersion = "1.0";
+        [XmlIgnore] public bool LoadOK;
+        [XmlElement(Order = 2)]
+        public string DebugLevel;
+
+        [XmlIgnore] private string _shortSleep;
+        [XmlElement(Order = 3)]
+        public string ShortSleep
+        {
+            get => _shortSleep;
+            set
+            {
+                bool parseOK = int.TryParse(value, out shortSleep);
+                if (parseOK && shortSleep >= 1)
+                {
+                    // TODO: log acceptable shortSleep
+                    Console.WriteLine($"ShortSleep [{shortSleep}] validated");
+                    _shortSleep = value;
+                }
+                else
+                {
+                    // Didn't parse or is <1 so let's set it to 1.
+                    // TODO: log the fact that we did this
+                    shortSleep = 1;
+                    _shortSleep = "1";
+                    Console.WriteLine($"ShortSleep set in config but invalid; defaulting to {shortSleep} second(s)");
+                }
+            }
+        }
+
+        [XmlIgnore] private string _intervalSeconds;
+
+        [XmlElement(Order = 4)]
+        public string IntervalSeconds
+        {
+            get => _intervalSeconds;
+            set
+            {
+                bool parseOK = int.TryParse(value, out intervalSec);
+                if (parseOK && intervalSec >= 1)
+                {
+                    // TODO: log acceptable intervalSeconds
+                    Console.WriteLine($"IntervalSeconds [{intervalSec}] validated");
+                    _intervalSeconds = value;
+                }
+                else
+                {
+                    // Didn't parse so let's default to 120 -- needs setting because TryParse craps all over the out variable if it doesn't parse.
+                    // TODO: log the fact that we did this
+                    intervalSec = defaultInterval;
+                    _intervalSeconds = defaultInterval.ToString();
+                    Console.WriteLine($"IntervalSeconds set in config but invalid; defaulting to {intervalSec} seconds");
+                }
+            }
+        }
+        [XmlElement(Order = 5)]
+        public string Sentinel; // only used if present
+        [XmlElement(Order = 6)]
+        public string ExitSentinel;
+        [XmlElement(Order = 7)]
+        public string DeleteOlderThan;
+        [XmlElement(Order = 8)]
+        public DataSource SourceDB; // Currently only supports ODBC
+        [XmlElement(Order = 9)]
+        public DataSource DestinationDB; // Currently only supports ".Net SqlClient Data Provider" aka "SqlClient";
+
+        [XmlIgnore] private const int defaultInterval = 15; // TODO: 120 for release
+        [XmlIgnore] public int shortSleep = 0;
+        // IntervalSeconds should exist, so if it doesn't, set it to default
+        [XmlIgnore] public int intervalSec = defaultInterval;
+
+
+
+        private static string GetPath()
+        {
+            return "C:\\S3\\TransformationService.xml";
+        }
+
+        public static LTWSConfig Load()
+        {
+            try
+            {
+                var ser = new XmlSerializer(typeof(LTWSConfig));
+                using (var reader = new StreamReader(GetPath()))
+                {
+                    var ret = (LTWSConfig)ser.Deserialize(reader);
+                    ret.LoadOK = true;
+                    return ret;
+                }
+            }
+            catch
+            {
+                // TODO: exception handler - write to event log
+                throw;
+            }
+        }
+    }
+
     static class Program
     {
         static void Main(string[] args)
@@ -330,12 +449,88 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test53();
+                test54();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        private static void test54a()
+        {
+            var cfg = new LTWSConfig();
+            string MyDocs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var ser = new XmlSerializer(typeof(LTWSConfig));
+            var inputFile = Path.Combine(MyDocs, "TestXformSvc.xml");
+            using (var reader = new StreamReader(inputFile))
+            {
+                cfg = (LTWSConfig)ser.Deserialize(reader);
+                Debugger.Break(); // rather than loads of Console.WriteLine junk, just inspect it in the debugger
+            }
+        }
+
+        // Another XML config file generator
+        private static void test54()
+        {
+            // nicked from test47; test47a deserialises to a breakpoint
+            var taskList = new List<string>()
+            {
+                "UniqueID,PERSONNEL_ID",
+                "SimpleCopy,FORENAMES,rw_pob.first_name",
+                "SimpleCopy,SURNAME,rw_pob.last_name",
+                "SimpleCopy,BIRTH_DATE,rw_pob.dob",
+                "SimpleCopy,COMPANY_NAME,rw_pob.company",
+                "SimpleCopy,BED,rw_pob.bed_no",
+                "DestFK,SPECIAL_DUTY,rw_pob.id_emergency_team,ro_emergency_team,id,name",
+                "Ignore,MUSTER_POINT",
+                "DestFK,LIFEBOAT,rw_pob.id_lifeboatpoint,ro_lifeboatpoint,id,name",
+                "SimpleCopy,SHIFT,rw_pob.shift",
+                "DestValue,rw_pob.checked_in,1",
+                "DestValue,rw_pob.checked_out,0"
+            };
+            var txList = new List<Transform>()
+            {
+                new Transform()
+                {
+                    DestTables = "rw_POB",
+                    QueryText =
+                        "SELECT PERSONNEL_ID, FORENAMES, SURNAME, BIRTH_DATE, COMPANY_NAME, BED, SPECIAL_DUTY, MUSTER_POINT, LIFEBOAT, SHIFT FROM vantage.dbo.s3_pob WHERE LOCATION='GEYE'",
+                    TaskList = taskList
+                },
+                new Transform()
+                {
+                    DestTables="foo,bar",
+                    QueryText="wibble"
+                }
+            };
+            var cfg = new LTWSConfig()
+            {
+                DebugLevel = "Full",
+                ShortSleep = "1",
+                IntervalSeconds = "10",
+                Sentinel = @"C:\S3\LogTX_DeleteToContinue.txt",
+                ExitSentinel = @"C:\S3\LogTX_DeleteToExit.txt",
+                DeleteOlderThan = "01-JAN-1998",
+                SourceDB = new DataSource()
+                {
+                    ConnectionString = "DSN=Vantage;UID=s3idapp;PWD=Automation1",
+                    Transformation = txList
+                },
+                DestinationDB = new DataSource()
+                {
+                    ConnectionString = "ODBC=wibble;FOO=wobble"
+                },
+            };
+            string MyDocs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var outputFile = Path.Combine(MyDocs, "TestXformSvc.xml");
+            var ser = new XmlSerializer(typeof(LTWSConfig));
+            Console.WriteLine(outputFile);
+            using (var writer = new FileStream(outputFile, FileMode.Create))
+            {
+                ser.Serialize(writer, cfg);
             }
         }
 
