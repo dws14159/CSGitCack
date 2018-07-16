@@ -449,13 +449,68 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test56();
+                test57();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        private static List<string> RecombineQuotedStrings(string[] tokens)
+        {
+            var ret = new List<string>();
+            char quoteChar = '"';
+            int state = 0;
+            string newtok = "";
+            foreach (var t in tokens)
+            {
+                switch (state)
+                {
+                    case 0: // looking for first to combine, e.g. _"task_ or _'task_
+                        if (t[0] == '"' || t[0] == '\'')
+                        {
+                            quoteChar = t[0];
+                        }
+
+                        if (t[0] == quoteChar && t[t.Length - 1] != quoteChar)
+                        {
+                            state = 1;
+                            newtok = t;
+                        }
+                        else
+                        {
+                            ret.Add(t);
+                        }
+
+                        break;
+
+                    case 1: // recombining; looking for last to combine, e.g. _task"_ or _task'_
+                        newtok += "," + t;
+                        if (t[t.Length - 1] == quoteChar)
+                        {
+                            state = 0;
+                            ret.Add(newtok);
+                            newtok = "";
+                        }
+
+                        break;
+                }
+            }
+
+            return ret;
+        }
+
+        // Split(',') even splits quoted strings - need a function to recombine them
+        private static void test57()
+        {
+            string task = "task1,\"task2a,b,c\",\"task3\",task4";
+            var tokens = RecombineQuotedStrings(task.Split(','));
+            foreach (var t in tokens)
+            {
+                Console.WriteLine(t);
             }
         }
 
