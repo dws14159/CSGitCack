@@ -406,7 +406,7 @@ namespace CSGitCack
 
         private static string GetPath()
         {
-            return "C:\\S3\\TransformationService.xml";
+            return "C:\\S3\\TransformationServiceXXX.xml";
         }
 
         public static LTWSConfig Load()
@@ -449,7 +449,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test55();
+                test56();
             }
             catch (Exception e)
             {
@@ -457,6 +457,37 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        // Are these two blocks identical?
+        // Loop can be converted into LINQ-expression
+        private static void test56()
+        {
+            var LHS = new List<string>() { "A", "B", "C", "D", "E" };
+            var RHS = new List<string>() { "1", "2", "3", "4", "5" };
+            var joins = new List<string>();
+            string msg1 = "The list is: ";
+            for (int i = 0; i < LHS.Count; i++) // "Loop can be converted into LINQ-expression" - can it?
+            {
+                joins.Add(LHS[i] + "=" + RHS[i]);
+            }
+
+            Console.WriteLine(msg1 + string.Join(";", joins));
+            // Output: The list is: A = 1; B = 2; C = 3; D = 4; E = 5
+
+            // From previous code:
+            // var updateList = columnList.Select((t, i) => t + "=" + valueList[i]).ToList();
+            // var joins = LHS.Select((t, i) => t + "=" + RHS[i]).ToList();
+            var msg2 = LHS.Select((t, i) => t + "=" + RHS[i]).ToList();
+            Console.WriteLine(msg2);
+            // Output: System.Collections.Generic.List`1[System.String] - Not like this!
+
+            Console.WriteLine(string.Join(";", msg2));
+            // Output: A=1;B=2;C=3;D=4;E=5 - That's better
+
+            var msg3 = LHS.Select((t, i) => t + "=" + RHS[i]).ToList();
+            Console.WriteLine(msg1 + string.Join(";", msg3));
+            // Output: The list is: A = 1; B = 2; C = 3; D = 4; E = 5 - That's the original result
         }
 
         // Why is a DataRowCollection a collection of object not a collection of DataRow?
