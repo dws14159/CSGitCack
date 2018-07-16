@@ -500,13 +500,24 @@ namespace CSGitCack
                 }
             }
 
+            if (state == 1) // then we've got to the end of the list without a closing quote, e.g. [task1,\"task2a,b,c]
+            {
+                // It's anyone's guess what the user actually meant here, so let's just bung a quote at the end and leave them to figure out what's wrong
+                newtok += quoteChar;
+                ret.Add(newtok);
+            }
             return ret;
         }
 
         // Split(',') even splits quoted strings - need a function to recombine them
         private static void test57()
         {
-            string task = "task1,\"task2a,b,c\",\"task3\",task4";
+            //string task = "task1,\"task2a,b,c\",\"task3\",task4";
+            // What if the last one isn't closed?
+            // First let's make sure the last one being closed works OK: [task1 - "task2a,b,c"] yep
+            //string task = "task1,\"task2a,b,c\"";
+            string task = "task1,\"task2a,b,c"; // 
+            // Output: just task1. After extra code: [task1 - "task2a,b,c"] OK
             var tokens = RecombineQuotedStrings(task.Split(','));
             foreach (var t in tokens)
             {
