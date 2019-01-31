@@ -449,7 +449,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test57();
+                test58();
             }
             catch (Exception e)
             {
@@ -457,6 +457,20 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        private static void test58()
+        {
+            byte val1 = 0x81;
+            Console.WriteLine("Val1=" + val1);
+
+            sbyte val2 = 64;
+            val2 <<= 1;
+            val2++;
+            Console.WriteLine("Val2=" + val2);
+
+            int val3 = (int)val2;
+            Console.WriteLine("Val3=" + val3);
         }
 
         private static List<string> RecombineQuotedStrings(string[] tokens)
