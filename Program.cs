@@ -449,13 +449,96 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test58();
+                test59();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        // Test the ParityChecker stuff
+        private enum Parity { IsEven, IsOdd };
+        private static bool ParityCheck(byte b, Parity type, bool pbit)
+        {
+            byte bits = 0;
+            byte b_orig = b;
+            while (b != 0)
+            {
+                // We don't care about the actual number of bits, just flip this flag each time we encounter a 1
+                bits ^= (byte)(b & 1);
+                b /= 2;
+            }
+
+            // This looks fairly unintuitive. Taking the above example 101001, it has three 1-bits, so in an Even Parity world the parity bit must be a 1.
+            // So if pbit==1 we can return true.
+            bool ret = pbit == ((bits == 1 && type == Parity.IsEven) || (bits == 0 && type == Parity.IsOdd));
+            Console.WriteLine($"In ParityCheck(byte b={b_orig}, Parity type={type.ToString()}, bool pbit=={pbit}); calculated parity bit={bits}; returning {ret}");
+            return ret;
+        }
+
+        private static bool ParityBit(byte b, Parity type)
+        {
+            byte bits = 0;
+            while (b != 0)
+            {
+                // We don't care about the actual number of bits, just flip this flag each time we encounter a 1
+                bits ^= (byte)(b & 1);
+                b /= 2;
+            }
+            // If we want even parity, then we return 1 if the bit count is odd (so the overall parity is even)
+            return (type == Parity.IsEven && bits == 1) || (type == Parity.IsOdd && bits == 0);
+        }
+
+        private static int BitCount(int n)
+        {
+            int ret = 0;
+            while (n != 0)
+            {
+                ret += (n & 1);
+                n /= 2;
+            }
+
+            return ret;
+        }
+        private static void test59a()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                string bitReport = "";
+                int numBits = BitCount(i);
+                switch (numBits)
+                {
+                    case 0: bitReport = "no '1' bits";
+                        break;
+                    case 1: bitReport = "one '1' bit";
+                        break;
+                    default: bitReport = $"{numBits} '1' bits";
+                        break;
+                }
+                Console.WriteLine($"Number {i} has {bitReport}; PE bit {ParityBit((byte)i, Parity.IsEven)}; PO bit {ParityBit((byte)i, Parity.IsOdd)}");
+            }
+        }
+        private static void test59()
+        {
+            byte[] arr;
+            for (int i = 0; i < 6; i++)
+            {
+                switch (i)
+                {
+                    case 0: arr = new byte[] { 0b00000011, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b11000000 }; break;
+                    case 1: arr = new byte[] { 0b00000100, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b01000000 }; break;
+                    case 2: arr = new byte[] { 0b00000110, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b00000000 }; break;
+                    case 3: arr = new byte[] { 0b00001000, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b10000000 }; break;
+                    case 4: arr = new byte[] { 0b00001010, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b11000000 }; break;
+                    default: arr = new byte[] { 0b00001101, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b01000000 }; break;
+                }
+                byte pe = (byte)((arr[0] & 0b10110110) ^ (arr[1] & 0b01101101) ^ (arr[2] & 0b11011011) ^ (arr[3] & 0b10110110) ^ (arr[4] & 0b01101101) ^ (arr[5] & 0b00011011));
+                byte po = (byte)((arr[0] & 0b01101100) ^ (arr[1] & 0b11011011) ^ (arr[2] & 0b10110110) ^ (arr[3] & 0b01101101) ^ (arr[4] & 0b11011011) ^ (arr[5] & 0b00110110));
+                byte po2 = (byte)(arr[0] ^ arr[1] ^ arr[2] ^ arr[3] ^ arr[4] ^ (arr[5] & 0x7f));
+                Console.WriteLine($"Bits {i}: pe={ParityCheck(pe, Parity.IsEven, (arr[5] & 64) == 64)}; po={ParityCheck(po, Parity.IsOdd, (arr[0] & 1) == 1)}; po2={ParityCheck(po2, Parity.IsOdd, (arr[5] & 128) == 128)}");
             }
         }
 
