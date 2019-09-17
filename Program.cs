@@ -6,20 +6,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Printing;
-using System.Printing.Interop;
 using System.Management;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
-using System.Windows.Forms;
 using System.Windows.Media;
 using System.Globalization;
 using System.Data;
 using System.Data.SqlClient;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Windows;
@@ -33,404 +28,6 @@ using Microsoft.Win32;
 
 namespace CSGitCack
 {
-    #region XYstuff
-
-    public class XYBase
-    {
-        public virtual void Speak()
-        {
-            Console.WriteLine("XYBase");
-        }
-    }
-
-    public class XYLevel1A : XYBase
-    {
-        public override void Speak()
-        {
-            Console.WriteLine("XYLevel1A");
-        }
-    }
-
-    public class XYLevel1B : XYBase
-    {
-        public override void Speak()
-        {
-            Console.WriteLine("XYLevel1B");
-        }
-    }
-
-    public class XYLevel2 : XYLevel1A
-    {
-        public override void Speak()
-        {
-            Console.WriteLine("XYLevel2");
-        }
-    }
-
-    public static class XYExtensions
-    {
-        public static void UpSpeak(this XYBase foo)
-        {
-            Console.WriteLine("XYBase UpSpeak");
-        }
-
-        public static void UpSpeak(this XYLevel1A foo)
-        {
-            Console.WriteLine("XYLevel1A UpSpeak");
-        }
-
-        public static void UpSpeak(this XYLevel1B foo)
-        {
-            Console.WriteLine("XYLevel1B UpSpeak");
-        }
-
-        public static void UpSpeak(this XYLevel2 foo)
-        {
-            Console.WriteLine("XYLevel2 UpSpeak");
-        }
-    }
-
-    #endregion
-
-    #region Clock tower event stuff
-
-    public class Person
-    {
-        private string name;
-        private ClockTower tower;
-
-        private List<int> InterestedTimes;
-
-        //private
-        public Person(string n, ClockTower c, List<int> it)
-        {
-            name = n;
-            tower = c;
-            InterestedTimes = it;
-
-            tower.Chime += (object sender, ClockTowerEventArgs args) =>
-            {
-                if (InterestedTimes.Contains(args.Time))
-                {
-                    Console.WriteLine($"{name} responding to chime at {args.Time}");
-                }
-            };
-
-            string s = $"Initialising new Person({name}, ClockTower, times[{string.Join(",", it)}]";
-            Console.WriteLine(s);
-        }
-    }
-
-    public class ClockTowerEventArgs : EventArgs
-    {
-        public int Time { get; set; }
-    }
-
-    public delegate void ChimeEventHandler(object sender, ClockTowerEventArgs e);
-
-    public class ClockTower
-    {
-        public event ChimeEventHandler Chime;
-        private int hours, mins;
-
-        public ClockTower()
-        {
-            hours = mins = 0;
-        }
-
-        public int Tick()
-        {
-            mins++;
-            if (mins > 59)
-            {
-                mins = 0;
-                hours++;
-                if (hours > 23)
-                    hours = 0;
-            }
-
-            int ret = hours * 100 + mins;
-            Chime(this, new ClockTowerEventArgs {Time = ret});
-            return ret;
-        }
-    }
-
-    #endregion
-
-    #region Z-order stuff
-
-    public class ZedThing
-    {
-        public string message;
-        public int zPos;
-
-        public ZedThing(string message, int zPos)
-        {
-            this.message = message;
-            this.zPos = zPos;
-        }
-    }
-
-    #endregion
-
-    #region test24 memleak stuff
-
-    public class MemLeak
-    {
-        public BitmapImage ImageSourceFromFile(string myImageFile)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(myImageFile))
-                    return null;
-
-                var image = new BitmapImage();
-                var ms = new MemoryStream();
-                BitmapDecoder bd;
-                using (FileStream fs = File.OpenRead(myImageFile))
-                {
-                    string ext = Path.GetExtension(myImageFile).ToUpper();
-                    switch (ext)
-                    {
-                        case ".BMP":
-                            bd = new BmpBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat,
-                                BitmapCacheOption.OnLoad);
-                            break;
-                        case ".GIF":
-                            bd = new GifBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat,
-                                BitmapCacheOption.OnLoad);
-                            break;
-                        case ".JPG":
-                        case ".JPEG":
-                            bd = new JpegBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat,
-                                BitmapCacheOption.OnLoad);
-                            break;
-                        case ".PNG":
-                            bd = new PngBitmapDecoder(fs, BitmapCreateOptions.PreservePixelFormat,
-                                BitmapCacheOption.OnLoad);
-                            break;
-                        default:
-                            throw new Exception($"Unknown file extension '{ext}'");
-                    }
-
-                    var png = new PngBitmapEncoder();
-                    png.Frames.Add(bd.Frames[0]);
-                    png.Save(ms);
-
-                    image.BeginInit();
-                    image.CacheOption = BitmapCacheOption.OnLoad;
-                    image.StreamSource = ms;
-                    image.EndInit();
-                }
-
-                return image;
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"File Open error: '{ex.Message}'");
-                return null;
-            }
-        }
-
-    }
-
-    #endregion
-
-    #region Lock test stuff
-
-    public class LockTest1
-    {
-        //private object _lock = "lock";
-        //private string _lock = "lock";
-
-        public IEnumerable<int> GetNum(object foo)
-        {
-            lock (foo)
-            {
-                yield return 1;
-                yield return 2;
-            }
-        }
-    }
-
-    public class LockTest2
-    {
-        //private object _lock = "lock";
-        //private string _lock = "lock";
-
-        public IEnumerable<int> GetNum(object foo)
-        {
-            lock (foo)
-            {
-                yield return 1;
-                yield return 2;
-            }
-        }
-    }
-
-    #endregion
-
-    public class EndPointInfo
-    {
-        public string IPAddr { get; set; }
-        public int Port { get; set; }
-    }
-
-    public class ReaderInfo
-    {
-        public EndPointInfo EndPoint { get; set; }
-        public string FriendlyName { get; set; }
-    }
-
-    public class TagFriendlyName
-    {
-        public string TagID { get; set; }
-        public string Name { get; set; }
-    }
-
-    public class ZoneInfo
-    {
-        public string Name { get; set; }
-        public string OverlayImage { get; set; }
-        public List<ReaderInfo> Readers { get; set; }
-    }
-
-    public class Config
-    {
-        public string FileVersion = "DrillRigDemo Config V1.0";
-        [XmlIgnore]
-        public bool LoadOK;
-        public List<ZoneInfo> ZonesInfo { get; set; } = new List<ZoneInfo>();
-        //public List<TagFriendlyName> TagFriendlyNames { get; set; } = new List<TagFriendlyName>();
-        //public List<string> TagsSeen { get; set; } = new List<string>();
-        //public string BackgroundImage { get; set; }
-        //public List<string> OverlayFiles { get; set; } = new List<string>();
-
-        private string GetPath()
-        {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DrillRigDemo.xml");
-        }
-    }
-
-    public class Transform
-    {
-        [XmlElement(Order = 1)]
-        public string DestTables;
-        [XmlElement(Order = 2)]
-        public string QueryText;
-        [XmlArray(Order = 3)]
-        [XmlArrayItem(ElementName = "Task")]
-        public List<string> TaskList;
-    }
-    public class DataSource
-    {
-        [XmlElement(Order = 1)]
-        public string ConnectionString;
-        [XmlElement(Order = 2)]
-        public List<Transform> Transformation;
-    }
-
-    public class LTWSConfig
-    {
-        [XmlElement(Order = 1)]
-        public string FileVersion = "1.0";
-        [XmlIgnore] public bool LoadOK;
-        [XmlElement(Order = 2)]
-        public string DebugLevel;
-
-        [XmlIgnore] private string _shortSleep;
-        [XmlElement(Order = 3)]
-        public string ShortSleep
-        {
-            get => _shortSleep;
-            set
-            {
-                bool parseOK = int.TryParse(value, out shortSleep);
-                if (parseOK && shortSleep >= 1)
-                {
-                    // TODO: log acceptable shortSleep
-                    Console.WriteLine($"ShortSleep [{shortSleep}] validated");
-                    _shortSleep = value;
-                }
-                else
-                {
-                    // Didn't parse or is <1 so let's set it to 1.
-                    // TODO: log the fact that we did this
-                    shortSleep = 1;
-                    _shortSleep = "1";
-                    Console.WriteLine($"ShortSleep set in config but invalid; defaulting to {shortSleep} second(s)");
-                }
-            }
-        }
-
-        [XmlIgnore] private string _intervalSeconds;
-
-        [XmlElement(Order = 4)]
-        public string IntervalSeconds
-        {
-            get => _intervalSeconds;
-            set
-            {
-                bool parseOK = int.TryParse(value, out intervalSec);
-                if (parseOK && intervalSec >= 1)
-                {
-                    // TODO: log acceptable intervalSeconds
-                    Console.WriteLine($"IntervalSeconds [{intervalSec}] validated");
-                    _intervalSeconds = value;
-                }
-                else
-                {
-                    // Didn't parse so let's default to 120 -- needs setting because TryParse craps all over the out variable if it doesn't parse.
-                    // TODO: log the fact that we did this
-                    intervalSec = defaultInterval;
-                    _intervalSeconds = defaultInterval.ToString();
-                    Console.WriteLine($"IntervalSeconds set in config but invalid; defaulting to {intervalSec} seconds");
-                }
-            }
-        }
-        [XmlElement(Order = 5)]
-        public string Sentinel; // only used if present
-        [XmlElement(Order = 6)]
-        public string ExitSentinel;
-        [XmlElement(Order = 7)]
-        public string DeleteOlderThan;
-        [XmlElement(Order = 8)]
-        public DataSource SourceDB; // Currently only supports ODBC
-        [XmlElement(Order = 9)]
-        public DataSource DestinationDB; // Currently only supports ".Net SqlClient Data Provider" aka "SqlClient";
-
-        [XmlIgnore] private const int defaultInterval = 15; // TODO: 120 for release
-        [XmlIgnore] public int shortSleep = 0;
-        // IntervalSeconds should exist, so if it doesn't, set it to default
-        [XmlIgnore] public int intervalSec = defaultInterval;
-
-
-
-        private static string GetPath()
-        {
-            return "C:\\S3\\TransformationServiceXXX.xml";
-        }
-
-        public static LTWSConfig Load()
-        {
-            try
-            {
-                var ser = new XmlSerializer(typeof(LTWSConfig));
-                using (var reader = new StreamReader(GetPath()))
-                {
-                    var ret = (LTWSConfig)ser.Deserialize(reader);
-                    ret.LoadOK = true;
-                    return ret;
-                }
-            }
-            catch
-            {
-                // TODO: exception handler - write to event log
-                throw;
-            }
-        }
-    }
-
     static class Program
     {
         static void Main(string[] args)
@@ -475,255 +72,6 @@ namespace CSGitCack
             Console.WriteLine("test58 exit");
         }
 
-
-        // Test the ParityChecker stuff
-        private enum Parity { IsEven, IsOdd };
-        private static bool ParityCheck(byte b, Parity type, bool pbit)
-        {
-            byte bits = 0;
-            byte b_orig = b;
-            while (b != 0)
-            {
-                // We don't care about the actual number of bits, just flip this flag each time we encounter a 1
-                bits ^= (byte)(b & 1);
-                b /= 2;
-            }
-
-            // This looks fairly unintuitive. Taking the above example 101001, it has three 1-bits, so in an Even Parity world the parity bit must be a 1.
-            // So if pbit==1 we can return true.
-            bool ret = pbit == ((bits == 1 && type == Parity.IsEven) || (bits == 0 && type == Parity.IsOdd));
-            Console.WriteLine($"In ParityCheck(byte b={b_orig}, Parity type={type.ToString()}, bool pbit=={pbit}); calculated parity bit={bits}; returning {ret}");
-            return ret;
-        }
-
-        private static bool ParityBit(byte b, Parity type)
-        {
-            byte bits = 0;
-            while (b != 0)
-            {
-                // We don't care about the actual number of bits, just flip this flag each time we encounter a 1
-                bits ^= (byte)(b & 1);
-                b /= 2;
-            }
-            // If we want even parity, then we return 1 if the bit count is odd (so the overall parity is even)
-            return (type == Parity.IsEven && bits == 1) || (type == Parity.IsOdd && bits == 0);
-        }
-
-        private static int BitCount(int n)
-        {
-            int ret = 0;
-            while (n != 0)
-            {
-                ret += (n & 1);
-                n /= 2;
-            }
-
-            return ret;
-        }
-        private static void test59a()
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                string bitReport = "";
-                int numBits = BitCount(i);
-                switch (numBits)
-                {
-                    case 0: bitReport = "no '1' bits";
-                        break;
-                    case 1: bitReport = "one '1' bit";
-                        break;
-                    default: bitReport = $"{numBits} '1' bits";
-                        break;
-                }
-                Console.WriteLine($"Number {i} has {bitReport}; PE bit {ParityBit((byte)i, Parity.IsEven)}; PO bit {ParityBit((byte)i, Parity.IsOdd)}");
-            }
-        }
-        private static void test59()
-        {
-            byte[] arr;
-            for (int i = 0; i < 6; i++)
-            {
-                switch (i)
-                {
-                    case 0: arr = new byte[] { 0b00000011, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b11000000 }; break;
-                    case 1: arr = new byte[] { 0b00000100, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b01000000 }; break;
-                    case 2: arr = new byte[] { 0b00000110, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b00000000 }; break;
-                    case 3: arr = new byte[] { 0b00001000, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b10000000 }; break;
-                    case 4: arr = new byte[] { 0b00001010, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b11000000 }; break;
-                    default: arr = new byte[] { 0b00001101, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b01000000 }; break;
-                }
-                byte pe = (byte)((arr[0] & 0b10110110) ^ (arr[1] & 0b01101101) ^ (arr[2] & 0b11011011) ^ (arr[3] & 0b10110110) ^ (arr[4] & 0b01101101) ^ (arr[5] & 0b00011011));
-                byte po = (byte)((arr[0] & 0b01101100) ^ (arr[1] & 0b11011011) ^ (arr[2] & 0b10110110) ^ (arr[3] & 0b01101101) ^ (arr[4] & 0b11011011) ^ (arr[5] & 0b00110110));
-                byte po2 = (byte)(arr[0] ^ arr[1] ^ arr[2] ^ arr[3] ^ arr[4] ^ (arr[5] & 0x7f));
-                Console.WriteLine($"Bits {i}: pe={ParityCheck(pe, Parity.IsEven, (arr[5] & 64) == 64)}; po={ParityCheck(po, Parity.IsOdd, (arr[0] & 1) == 1)}; po2={ParityCheck(po2, Parity.IsOdd, (arr[5] & 128) == 128)}");
-            }
-        }
-
-        private static void test58()
-        {
-            byte val1 = 0x81;
-            Console.WriteLine("Val1=" + val1);
-
-            sbyte val2 = 64;
-            val2 <<= 1;
-            val2++;
-            Console.WriteLine("Val2=" + val2);
-
-            int val3 = (int)val2;
-            Console.WriteLine("Val3=" + val3);
-        }
-
-        private static SqlConnection createConnection()
-        {
-            String myConnectionString = "Data Source=devsql01\\sitedb;Initial Catalog=ATS;User Id=dev; Password=Automation15;Connect Timeout=5;Connection Lifetime=30;Pooling=false";
-            SqlConnection SQLcon = new SqlConnection(myConnectionString);
-            try
-            {
-                SQLcon.Open();
-            }
-            catch (SqlException ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            return SQLcon;
-        }
-        private static void closeConnection(SqlConnection SQLcon)
-        {
-            try
-            {
-                SQLcon.Close();
-            }
-            catch (SqlException ex)
-            {
-                Console.WriteLine(ex);
-            }
-        }
-
-        public static int getTotalNumber(String command)
-        {
-            // Create Connection
-            SqlConnection SQLcon = createConnection();
-            int returnValue = 0;
-
-            try
-            {
-                if (SQLcon.State == ConnectionState.Open)
-                {
-                    // retrieve total number of personnel on board
-                    SqlCommand pobCommand = new SqlCommand();
-                    pobCommand.CommandText = command;
-                    pobCommand.Connection = SQLcon;
-                    returnValue = int.Parse(pobCommand.ExecuteScalar().ToString());
-                }
-            }
-            catch (SqlException ex)
-            {
-                Console.WriteLine(ex);
-            }
-            //close connection
-            closeConnection(SQLcon);
-
-            return returnValue;
-        }
-        private static DataTable getDataTable(String command)
-        {
-            DataTable dtable = new DataTable();
-            // Create Connection
-            SqlConnection SQLcon = createConnection();
-
-            try
-            {
-                //retrieve dataTable
-                SqlDataAdapter executeCommand = new SqlDataAdapter(command, SQLcon);
-                executeCommand.Fill(dtable);
-            }
-            catch (SqlException ex)
-            {
-                Console.WriteLine(ex);
-            }
-            //close connection
-            closeConnection(SQLcon);
-
-            return dtable;
-        }
-        private static Image convertByteToImage(Object pictureByte)
-        {
-            byte[] imageByte = new byte[0];
-            imageByte = (byte[])pictureByte;
-            MemoryStream memStream = new MemoryStream(imageByte);
-            Image returnImage = Image.FromStream(memStream);
-
-            return returnImage;
-        }
-
-        private static void retreiveData(System.Windows.Forms.DataGridView pobUnAcknowledgedGridView, System.Windows.Forms.DataGridView pobOnSiteGridView)
-        {
-            DataRetreiver dataretreiver = new DataRetreiver();
-            int gateID = 82;
-
-            // populate grids
-            dataretreiver.populateUnacknowledgedPersonnel(pobUnAcknowledgedGridView, gateID);
-            dataretreiver.populateAcknowledgedPersonnel(pobOnSiteGridView, gateID);
-            String tagId = "";
-            DataTable allTags = dataretreiver.getFirstUndisplayedTag(gateID);
-            // loop through grid
-            if (allTags.Rows.Count != 0)
-                foreach (DataRow tag in allTags.Rows)
-                {
-                    tagId = allTags.Rows[0][0].ToString();
-                    // retrieve personnel details
-                    DataTable displayedData = dataretreiver.retrieveDisplayPersonnel(tag["ubisensetagid"].ToString());
-                    if (displayedData.Rows.Count != 0)
-                    {
-                        foreach (DataRow row in displayedData.Rows)
-                        {
-                            String dob = row["dob"].ToString();
-                            dob = dob.Substring(0, dob.IndexOf(":") - 3);
-
-                            if (row["photograph"].ToString().Length > 0 && row["photograph"].ToString() != null)
-                            {
-                                var personnelPicture_BackgroundImage = new Bitmap(convertByteToImage(row["photograph"]));
-                            }
-                            else
-                            {
-                                var personnelPicture_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/PicNotAvailable.png");
-                            }
-
-                            if (row["batterystatus"].ToString() != "OK")
-                            {
-                                var batteryStatusPictureBox_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/BatteryEmpty.png");
-                                var stopGoPictureBox_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/stopSignOn.jpg");
-                            }
-                            else
-                            {
-                                var batteryStatusPictureBox_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/BatteryFull.png");
-                                var stopGoPictureBox_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/goSignOn.jpg");
-                            }
-                        }
-                    }
-                    // check if tag is assigned to vehicle and diplay appropriate label
-                    else if (displayedData.Rows.Count == 0)
-                    {
-                        DataTable vehicles = dataretreiver.getVehicleTag(tag["ubisensetagid"].ToString());
-                        if (vehicles.Rows.Count != 0)
-                        {
-                            foreach (DataRow row in vehicles.Rows)
-                            {
-                                var regLabel_Text = row["registration"].ToString();
-                                var descLabel_Text = row["details"].ToString();
-                            }
-                        }
-                    }
-                }
-            // there is no queue - display front screen logo
-            if (allTags.Rows.Count == 0)
-            {
-                tagId = "";
-            }
-        }
-
-
         private static int test60a() // Does not leak
         {
             int timer = 2000;
@@ -738,7 +86,8 @@ namespace CSGitCack
             int ret = 1;
             try
             {
-                String myConnectionString = "Data Source=devsql01\\sitedb;Initial Catalog=ATS;User Id=dev; Password=Automation15;Connect Timeout=5;Connection Lifetime=30;Pooling=false";
+                String myConnectionString =
+                    "Data Source=devsql01\\sitedb;Initial Catalog=ATS;User Id=dev; Password=Automation15;Connect Timeout=5;Connection Lifetime=30;Pooling=false";
                 SqlConnection con = new SqlConnection(myConnectionString);
                 con.Open();
                 con.Close();
@@ -755,14 +104,14 @@ namespace CSGitCack
         private static int test60c() // Does not leak
         {
             String command = "SELECT maximum FROM viewsitemaximum";
-            return getTotalNumber(command);
+            return DBInterface.getTotalNumber(command);
         }
 
         private static int test60d() // Does not leak
         {
             try
             {
-                var dt = getDataTable("SELECT name,dob,company,position,thumbnail FROM viewpersonneltagunacknowledge");
+                var dt = DBInterface.getDataTable("SELECT name,dob,company,position,thumbnail FROM viewpersonneltagunacknowledge");
                 return dt.Rows.Count;
             }
             catch (Exception e)
@@ -771,20 +120,23 @@ namespace CSGitCack
                 return 0;
             }
         }
+
         private static int test60e()
         {
             try
             {
                 var pobUnAcknowledgedGridView = new System.Windows.Forms.DataGridView();
                 var pobOnSiteGridView = new System.Windows.Forms.DataGridView();
-                retreiveData(pobUnAcknowledgedGridView, pobOnSiteGridView);
+                DataRetreiver_Test.retreiveData(pobUnAcknowledgedGridView, pobOnSiteGridView);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
+
             return 0;
         }
+
         private static void test60()
         {
             for (;;)
@@ -794,54 +146,78 @@ namespace CSGitCack
                     total += test60e();
             }
         }
-        private static List<string> RecombineQuotedStrings(string[] tokens)
+
+        private static void test59a()
         {
-            var ret = new List<string>();
-            char quoteChar = '"';
-            int state = 0;
-            string newtok = "";
-            foreach (var t in tokens)
+            for (int i = 0; i < 10; i++)
             {
-                switch (state)
+                string bitReport = "";
+                int numBits = ParityStuff.BitCount(i);
+                switch (numBits)
                 {
-                    case 0: // looking for first to combine, e.g. _"task_ or _'task_
-                        if (t[0] == '"' || t[0] == '\'')
-                        {
-                            quoteChar = t[0];
-                        }
-
-                        if (t[0] == quoteChar && t[t.Length - 1] != quoteChar)
-                        {
-                            state = 1;
-                            newtok = t;
-                        }
-                        else
-                        {
-                            ret.Add(t);
-                        }
-
+                    case 0:
+                        bitReport = "no '1' bits";
                         break;
-
-                    case 1: // recombining; looking for last to combine, e.g. _task"_ or _task'_
-                        newtok += "," + t;
-                        if (t[t.Length - 1] == quoteChar)
-                        {
-                            state = 0;
-                            ret.Add(newtok);
-                            newtok = "";
-                        }
-
+                    case 1:
+                        bitReport = "one '1' bit";
+                        break;
+                    default:
+                        bitReport = $"{numBits} '1' bits";
                         break;
                 }
-            }
 
-            if (state == 1) // then we've got to the end of the list without a closing quote, e.g. [task1,\"task2a,b,c]
-            {
-                // It's anyone's guess what the user actually meant here, so let's just bung a quote at the end and leave them to figure out what's wrong
-                newtok += quoteChar;
-                ret.Add(newtok);
+                Console.WriteLine(
+                    $"Number {i} has {bitReport}; PE bit {ParityStuff.ParityBit((byte) i, ParityStuff.Parity.IsEven)}; PO bit {ParityStuff.ParityBit((byte) i, ParityStuff.Parity.IsOdd)}");
             }
-            return ret;
+        }
+
+        private static void test59()
+        {
+            byte[] arr;
+            for (int i = 0; i < 6; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        arr = new byte[] {0b00000011, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b11000000};
+                        break;
+                    case 1:
+                        arr = new byte[] {0b00000100, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b01000000};
+                        break;
+                    case 2:
+                        arr = new byte[] {0b00000110, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b00000000};
+                        break;
+                    case 3:
+                        arr = new byte[] {0b00001000, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b10000000};
+                        break;
+                    case 4:
+                        arr = new byte[] {0b00001010, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b11000000};
+                        break;
+                    default:
+                        arr = new byte[] {0b00001101, 0b00000000, 0b00000000, 0b01010110, 0b00010110, 0b01000000};
+                        break;
+                }
+
+                byte pe = (byte) ((arr[0] & 0b10110110) ^ (arr[1] & 0b01101101) ^ (arr[2] & 0b11011011) ^ (arr[3] & 0b10110110) ^ (arr[4] & 0b01101101) ^ (arr[5] & 0b00011011));
+                byte po = (byte) ((arr[0] & 0b01101100) ^ (arr[1] & 0b11011011) ^ (arr[2] & 0b10110110) ^ (arr[3] & 0b01101101) ^ (arr[4] & 0b11011011) ^ (arr[5] & 0b00110110));
+                byte po2 = (byte) (arr[0] ^ arr[1] ^ arr[2] ^ arr[3] ^ arr[4] ^ (arr[5] & 0x7f));
+                Console.WriteLine(
+                    $"Bits {i}: pe={ParityStuff.ParityCheck(pe, ParityStuff.Parity.IsEven, (arr[5] & 64) == 64)}; po={ParityStuff.ParityCheck(po, ParityStuff.Parity.IsOdd, (arr[0] & 1) == 1)}; po2={ParityStuff.ParityCheck(po2, ParityStuff.Parity.IsOdd, (arr[5] & 128) == 128)}");
+            }
+        }
+
+        private static void test58()
+        {
+            byte val1 = 0x81;
+            Console.WriteLine("Val1=" + val1);
+
+            sbyte val2 = 64;
+            val2 <<= 1;
+            val2++;
+            Console.WriteLine("Val2=" + val2);
+
+            int val3 = (int) val2;
+            Console.WriteLine("Val3=" + val3);
         }
 
         // Split(',') even splits quoted strings - need a function to recombine them
@@ -853,7 +229,7 @@ namespace CSGitCack
             //string task = "task1,\"task2a,b,c\"";
             string task = "task1,\"task2a,b,c"; // 
             // Output: just task1. After extra code: [task1 - "task2a,b,c"] OK
-            var tokens = RecombineQuotedStrings(task.Split(','));
+            var tokens = Conversions.RecombineQuotedStrings(task.Split(','));
             foreach (var t in tokens)
             {
                 Console.WriteLine(t);
@@ -864,8 +240,8 @@ namespace CSGitCack
         // Loop can be converted into LINQ-expression
         private static void test56()
         {
-            var LHS = new List<string>() { "A", "B", "C", "D", "E" };
-            var RHS = new List<string>() { "1", "2", "3", "4", "5" };
+            var LHS = new List<string>() {"A", "B", "C", "D", "E"};
+            var RHS = new List<string>() {"1", "2", "3", "4", "5"};
             var joins = new List<string>();
             string msg1 = "The list is: ";
             for (int i = 0; i < LHS.Count; i++) // "Loop can be converted into LINQ-expression" - can it?
@@ -947,7 +323,7 @@ namespace CSGitCack
             var inputFile = Path.Combine(MyDocs, "TestXformSvc.xml");
             using (var reader = new StreamReader(inputFile))
             {
-                cfg = (LTWSConfig)ser.Deserialize(reader);
+                cfg = (LTWSConfig) ser.Deserialize(reader);
                 Debugger.Break(); // rather than loads of Console.WriteLine junk, just inspect it in the debugger
             }
         }
@@ -982,8 +358,8 @@ namespace CSGitCack
                 },
                 new Transform()
                 {
-                    DestTables="foo,bar",
-                    QueryText="wibble"
+                    DestTables = "foo,bar",
+                    QueryText = "wibble"
                 }
             };
             var cfg = new LTWSConfig()
@@ -1019,7 +395,7 @@ namespace CSGitCack
         {
             int a = 5;
             int b = 2;
-            double c = (double)a / (double)b; // R# says cast is redundant but we get the right result 2.5
+            double c = (double) a / (double) b; // R# says cast is redundant but we get the right result 2.5
             double d = (double) a / b; // No R# whinge; 2.5
             double e = a / (double) b; // No R# whinge; 2.5
             double f = a / b; // No R# whinge, "Possible loss of fraction" prob from VS; result 2
@@ -1045,17 +421,19 @@ namespace CSGitCack
                 acts.Add(delegate { Console.WriteLine(nums[i]); });
                 // acts.Add(delegate  "{ Console.WriteLine(nums[i]); }"  );
             }
+
             // ev1.Invoke("foo", new EventArgs());
             // Console.WriteLine($"i={i}"); // error CS0103: The name 'i' does not exist in the current context
             acts[0](); // System.ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection.
         }
+
         private static void test51()
         {
             int len = 30;
             string str = $"{len:D3}";
             Console.WriteLine($"Length = [{str}]");
 
-            Byte[] hello = { 72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100 };
+            Byte[] hello = {72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100};
             //string plop = new string(Encoding.ASCII.GetChars(hello, 0, 5));
             Console.WriteLine($"hello: [{new string(Encoding.ASCII.GetChars(hello, 0, 5))}]");
         }
@@ -1075,6 +453,7 @@ namespace CSGitCack
             Console.WriteLine("Exit 50a");
             return ret;
         }
+
         private static async Task<int> test50b()
         {
             Console.WriteLine("Enter 50b");
@@ -1098,7 +477,7 @@ namespace CSGitCack
             Console.WriteLine("Calling func 2");
             var b = test50b();
             Console.WriteLine("Starting infinite loop");
-            for (; ; )
+            for (;;)
             {
                 if (a.IsCompleted && b.IsCompleted)
                     break;
@@ -1106,6 +485,7 @@ namespace CSGitCack
                 Console.WriteLine("Something isn't ready yet");
                 Thread.Sleep(500);
             }
+
             //Console.WriteLine("Doing my own thing for 3000");
             //Thread.Sleep(3000);
             Console.WriteLine($"The sum of a({a.Result}) and b({b.Result}) is {a.Result + b.Result}");
@@ -1120,6 +500,7 @@ namespace CSGitCack
             Console.WriteLine("Exit 49a");
             return ret;
         }
+
         private static async Task<int> test49b()
         {
             Console.WriteLine("Enter 49b");
@@ -1137,7 +518,7 @@ namespace CSGitCack
             var a = test49a();
             Console.WriteLine("Calling func 2");
             var b = test49b();
-            for (; ; )
+            for (;;)
             {
                 if (a.IsCompleted && b.IsCompleted)
                     break;
@@ -1145,6 +526,7 @@ namespace CSGitCack
                 Console.WriteLine("Something isn't ready yet");
                 Thread.Sleep(500);
             }
+
             //Console.WriteLine("Doing my own thing for 3000");
             //Thread.Sleep(3000);
             Console.WriteLine($"The sum of a({a.Result}) and b({b.Result}) is {a.Result + b.Result}");
@@ -1168,6 +550,7 @@ namespace CSGitCack
             Console.WriteLine("Exit 48b");
             return 25;
         }
+
         private static void test48()
         {
             var sw = Stopwatch.StartNew();
@@ -1176,7 +559,7 @@ namespace CSGitCack
             var a = Task.Run(() => test48a());
             Console.WriteLine("Calling func 2");
             var b = Task.Run(() => test48b());
-            for (; ; )
+            for (;;)
             {
                 if (a.IsCompleted && b.IsCompleted)
                     break;
@@ -1184,6 +567,7 @@ namespace CSGitCack
                 Console.WriteLine("Something isn't ready yet");
                 Thread.Sleep(500);
             }
+
             //Console.WriteLine("Doing my own thing for 3000");
             //Thread.Sleep(3000);
             Console.WriteLine($"The sum of a({a.Result}) and b({b.Result}) is {a.Result + b.Result}");
@@ -1198,7 +582,7 @@ namespace CSGitCack
             var inputFile = Path.Combine(MyDocs, "DrillRigDemo.xml");
             using (var reader = new StreamReader(inputFile))
             {
-                cfg = (Config)ser.Deserialize(reader);
+                cfg = (Config) ser.Deserialize(reader);
                 Debugger.Break(); // rather than loads of Console.WriteLine junk, just inspect it in the debugger
             }
         }
@@ -1915,53 +1299,13 @@ namespace CSGitCack
             Console.WriteLine($"'{strLaser}' installed: [{instLaser}]; '{strWibble}' installed: [{instWibble}]");
         }
 
-        // test25: What does GetTextGeometryAndFormatting do if the text is empty?
-        // Ans: Bounds.Width=-Inf.  Bounds.Width < 20 returns TRUE.
-
-        #region GetTextGeometryAndFormatting
-
-        static void GetTextGeometryAndFormatting(string Text, string Font, double FontSize, bool Italics, bool Bold,
-            System.Windows.Point Location, System.Windows.Media.Color Colour, out Geometry geom, out FormattedText ft,
-            out System.Windows.Point whitespace)
-        {
-            var tf = new Typeface(new System.Windows.Media.FontFamily(Font),
-                Italics ? FontStyles.Italic : FontStyles.Normal,
-                Bold ? FontWeights.Bold : FontWeights.Normal,
-                FontStretches.Normal);
-            var br1 = new SolidColorBrush();
-            try
-            {
-                br1.Color = Colour;
-            }
-            catch
-            {
-                br1.Color = System.Windows.Media.Color.FromArgb(255, 0, 0, 0);
-            }
-
-            string measureString = Text;
-            ft = new FormattedText(measureString, CultureInfo.InvariantCulture,
-                System.Windows.FlowDirection.LeftToRight, tf, FontSize, br1);
-
-            // Problem is: we don't know what the space dimensions are.  So if we draw it at 0,0, then the bounding rectangle will start at x,y which indicates the space dimension.
-            var geom1 = ft.BuildGeometry(new System.Windows.Point(0, 0));
-            // geom1.Bounds.TopLeft is now the width and height of the whitespace
-
-            // Rebuild the geometry to discard the whitespace and offset by this.(x,y), because for general use elsewhere we want geom.Bounds to indicate the drawn text area
-            whitespace = geom1.Bounds.TopLeft; // draw however still needs to be able to take this into account
-            System.Windows.Point offset =
-                new System.Windows.Point(whitespace.X * -1 + Location.X, whitespace.Y * -1 + Location.Y);
-            geom = ft.BuildGeometry(offset);
-        }
-
-        #endregion
-
         private static void test25()
         {
             Geometry geom;
             FormattedText ft;
             System.Windows.Point whitespace;
             string testStr = "";
-            GetTextGeometryAndFormatting(testStr, "Arial", 12, false, false, new System.Windows.Point(0, 0),
+            Conversions.GetTextGeometryAndFormatting(testStr, "Arial", 12, false, false, new System.Windows.Point(0, 0),
                 System.Windows.Media.Colors.Black, out geom, out ft, out whitespace);
             Console.WriteLine($"Width of test string '{testStr}' is {geom.Bounds.Width}");
             Console.WriteLine(
@@ -2130,72 +1474,47 @@ namespace CSGitCack
             Console.WriteLine(a == b ? "Arrays are equal" : "Arrays are not equal");
         }
 
-        static int[] primes =
-            {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97};
-
-        static int nextPrime(int p)
-        {
-            for (int i = 0; i < primes.Count() - 1; i++)
-            {
-                if (primes[i] == p)
-                    return primes[i + 1];
-            }
-
-            Console.WriteLine($"nextPrime({p}) couldn't return a value");
-            return 0;
-        }
-
-        static bool isPrime(int p)
-        {
-            foreach (var v in primes)
-            {
-                if (p == v)
-                    return true;
-            }
-
-            return false;
-        }
 
         // Brute force solver for https://puzzling.stackexchange.com/questions/56369/how-many-coins-did-mrs-jones-have
         private static void test20()
         {
             for (int lisaAge = 13; lisaAge <= 19; lisaAge++) // Lisa is teenage
             {
-                if (isPrime(lisaAge))
+                if (PrimeStuff.isPrime(lisaAge))
                 {
                     for (int jackAge = lisaAge + 2;
                         jackAge < 43;
                         jackAge++) // Lisa is "the teenager" so Jack and Amy must be at least 23
                     {
-                        if (isPrime(jackAge) && jackAge == nextPrime(lisaAge))
+                        if (PrimeStuff.isPrime(jackAge) && jackAge == PrimeStuff.nextPrime(lisaAge))
                         {
                             for (int amyAge = jackAge + 2; amyAge < 43; amyAge++)
                             {
-                                if (isPrime(amyAge) && amyAge == nextPrime(jackAge))
+                                if (PrimeStuff.isPrime(amyAge) && amyAge == PrimeStuff.nextPrime(jackAge))
                                 {
                                     Console.WriteLine($"Testing ages L:{lisaAge},J:{jackAge},A:{amyAge}");
                                     for (int month = 1; month <= 12; month++)
                                     {
-                                        if (isPrime(month))
+                                        if (PrimeStuff.isPrime(month))
                                         {
                                             for (int lisaDay = 1; lisaDay <= 31; lisaDay++)
                                             {
-                                                if (isPrime(lisaDay))
+                                                if (PrimeStuff.isPrime(lisaDay))
                                                 {
                                                     for (int jackDay = 1; jackDay <= 31; jackDay++)
                                                     {
-                                                        if (isPrime(jackDay))
+                                                        if (PrimeStuff.isPrime(jackDay))
                                                         {
                                                             for (int amyDay = 1; amyDay <= 31; amyDay++)
                                                             {
-                                                                if (isPrime(amyDay))
+                                                                if (PrimeStuff.isPrime(amyDay))
                                                                 {
                                                                     int lisaCoins = lisaAge + month + lisaDay;
                                                                     int jackCoins = jackAge + month + jackDay;
                                                                     int amyCoins = amyAge + month + amyDay;
-                                                                    if (isPrime(lisaCoins) && isPrime(jackCoins) &&
-                                                                        isPrime(amyCoins) &&
-                                                                        isPrime(lisaCoins + jackCoins + amyCoins))
+                                                                    if (PrimeStuff.isPrime(lisaCoins) && PrimeStuff.isPrime(jackCoins) &&
+                                                                        PrimeStuff.isPrime(amyCoins) &&
+                                                                        PrimeStuff.isPrime(lisaCoins + jackCoins + amyCoins))
                                                                     {
                                                                         if (lisaCoins > jackCoins &&
                                                                             lisaCoins > amyCoins)
