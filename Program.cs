@@ -461,6 +461,21 @@ namespace CSGitCack
             }
         }
 
+        private static void test62()
+        {
+            string code = "RFID";
+            string technologyCode = "RFID";
+            if (code == technologyCode)
+                Console.WriteLine("true");
+        }
+
+        private static void test61()
+        {
+            Console.WriteLine("test58 entry");
+            Console.WriteLine("test58 exit");
+        }
+
+
         // Test the ParityChecker stuff
         private enum Parity { IsEven, IsOdd };
         private static bool ParityCheck(byte b, Parity type, bool pbit)
@@ -779,20 +794,6 @@ namespace CSGitCack
                     total += test60e();
             }
         }
-        private static void test59()
-        {
-            string code = "RFID";
-            string technologyCode = "RFID";
-            if (code==technologyCode)
-                Console.WriteLine("true");
-        }
-
-        private static void test58()
-        {
-            Console.WriteLine("test58 entry");
-            Console.WriteLine("test58 exit");
-        }
-
         private static List<string> RecombineQuotedStrings(string[] tokens)
         {
             var ret = new List<string>();
