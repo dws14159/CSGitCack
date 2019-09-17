@@ -18,12 +18,14 @@ using System.Windows.Forms;
 using System.Windows.Media;
 using System.Globalization;
 using System.Data;
+using System.Data.SqlClient;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Windows;
 using System.Xml;
 using System.Xml.Serialization;
+using Microsoft.Win32;
 
 // UNC paths are not supported.  Defaulting to Windows directory.
 // To fix this, go to the project Properties -> Debug, change Working directory to somewhere on a local drive.
@@ -449,7 +451,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test57();
+                test60();
             }
             catch (Exception e)
             {
@@ -457,6 +459,241 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        private static SqlConnection createConnection()
+        {
+            String myConnectionString = "Data Source=devsql01\\sitedb;Initial Catalog=ATS;User Id=dev; Password=Automation15;Connect Timeout=5;Connection Lifetime=30;Pooling=false";
+            SqlConnection SQLcon = new SqlConnection(myConnectionString);
+            try
+            {
+                SQLcon.Open();
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            return SQLcon;
+        }
+        private static void closeConnection(SqlConnection SQLcon)
+        {
+            try
+            {
+                SQLcon.Close();
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public static int getTotalNumber(String command)
+        {
+            // Create Connection
+            SqlConnection SQLcon = createConnection();
+            int returnValue = 0;
+
+            try
+            {
+                if (SQLcon.State == ConnectionState.Open)
+                {
+                    // retrieve total number of personnel on board
+                    SqlCommand pobCommand = new SqlCommand();
+                    pobCommand.CommandText = command;
+                    pobCommand.Connection = SQLcon;
+                    returnValue = int.Parse(pobCommand.ExecuteScalar().ToString());
+                }
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine(ex);
+            }
+            //close connection
+            closeConnection(SQLcon);
+
+            return returnValue;
+        }
+        private static DataTable getDataTable(String command)
+        {
+            DataTable dtable = new DataTable();
+            // Create Connection
+            SqlConnection SQLcon = createConnection();
+
+            try
+            {
+                //retrieve dataTable
+                SqlDataAdapter executeCommand = new SqlDataAdapter(command, SQLcon);
+                executeCommand.Fill(dtable);
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine(ex);
+            }
+            //close connection
+            closeConnection(SQLcon);
+
+            return dtable;
+        }
+        private static Image convertByteToImage(Object pictureByte)
+        {
+            byte[] imageByte = new byte[0];
+            imageByte = (byte[])pictureByte;
+            MemoryStream memStream = new MemoryStream(imageByte);
+            Image returnImage = Image.FromStream(memStream);
+
+            return returnImage;
+        }
+
+        private static void retreiveData(System.Windows.Forms.DataGridView pobUnAcknowledgedGridView, System.Windows.Forms.DataGridView pobOnSiteGridView)
+        {
+            DataRetreiver dataretreiver = new DataRetreiver();
+            int gateID = 82;
+
+            // populate grids
+            dataretreiver.populateUnacknowledgedPersonnel(pobUnAcknowledgedGridView, gateID);
+            dataretreiver.populateAcknowledgedPersonnel(pobOnSiteGridView, gateID);
+            String tagId = "";
+            DataTable allTags = dataretreiver.getFirstUndisplayedTag(gateID);
+            // loop through grid
+            if (allTags.Rows.Count != 0)
+                foreach (DataRow tag in allTags.Rows)
+                {
+                    tagId = allTags.Rows[0][0].ToString();
+                    // retrieve personnel details
+                    DataTable displayedData = dataretreiver.retrieveDisplayPersonnel(tag["ubisensetagid"].ToString());
+                    if (displayedData.Rows.Count != 0)
+                    {
+                        foreach (DataRow row in displayedData.Rows)
+                        {
+                            String dob = row["dob"].ToString();
+                            dob = dob.Substring(0, dob.IndexOf(":") - 3);
+
+                            if (row["photograph"].ToString().Length > 0 && row["photograph"].ToString() != null)
+                            {
+                                var personnelPicture_BackgroundImage = new Bitmap(convertByteToImage(row["photograph"]));
+                            }
+                            else
+                            {
+                                var personnelPicture_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/PicNotAvailable.png");
+                            }
+
+                            if (row["batterystatus"].ToString() != "OK")
+                            {
+                                var batteryStatusPictureBox_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/BatteryEmpty.png");
+                                var stopGoPictureBox_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/stopSignOn.jpg");
+                            }
+                            else
+                            {
+                                var batteryStatusPictureBox_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/BatteryFull.png");
+                                var stopGoPictureBox_BackgroundImage = new Bitmap(dataretreiver.getResourcesFile() + "/goSignOn.jpg");
+                            }
+                        }
+                    }
+                    // check if tag is assigned to vehicle and diplay appropriate label
+                    else if (displayedData.Rows.Count == 0)
+                    {
+                        DataTable vehicles = dataretreiver.getVehicleTag(tag["ubisensetagid"].ToString());
+                        if (vehicles.Rows.Count != 0)
+                        {
+                            foreach (DataRow row in vehicles.Rows)
+                            {
+                                var regLabel_Text = row["registration"].ToString();
+                                var descLabel_Text = row["details"].ToString();
+                            }
+                        }
+                    }
+                }
+            // there is no queue - display front screen logo
+            if (allTags.Rows.Count == 0)
+            {
+                tagId = "";
+            }
+        }
+
+
+        private static int test60a() // Does not leak
+        {
+            int timer = 2000;
+            RegistryKey registryKey = Registry.LocalMachine;
+            registryKey = registryKey.OpenSubKey(@"Software\IslandD\Checkpoint");
+            timer = int.Parse(registryKey.GetValue("Gate App Timer").ToString());
+            return timer;
+        }
+
+        private static int test60b() // Does not leak
+        {
+            int ret = 1;
+            try
+            {
+                String myConnectionString = "Data Source=devsql01\\sitedb;Initial Catalog=ATS;User Id=dev; Password=Automation15;Connect Timeout=5;Connection Lifetime=30;Pooling=false";
+                SqlConnection con = new SqlConnection(myConnectionString);
+                con.Open();
+                con.Close();
+            }
+            catch (Exception e)
+            {
+                ret = 0;
+                Console.WriteLine(e);
+            }
+
+            return ret;
+        }
+
+        private static int test60c() // Does not leak
+        {
+            String command = "SELECT maximum FROM viewsitemaximum";
+            return getTotalNumber(command);
+        }
+
+        private static int test60d() // Does not leak
+        {
+            try
+            {
+                var dt = getDataTable("SELECT name,dob,company,position,thumbnail FROM viewpersonneltagunacknowledge");
+                return dt.Rows.Count;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return 0;
+            }
+        }
+        private static int test60e()
+        {
+            try
+            {
+                var pobUnAcknowledgedGridView = new System.Windows.Forms.DataGridView();
+                var pobOnSiteGridView = new System.Windows.Forms.DataGridView();
+                retreiveData(pobUnAcknowledgedGridView, pobOnSiteGridView);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return 0;
+        }
+        private static void test60()
+        {
+            for (;;)
+            {
+                int total = 0;
+                for (int i = 0; i < 1000; i++)
+                    total += test60e();
+            }
+        }
+        private static void test59()
+        {
+            string code = "RFID";
+            string technologyCode = "RFID";
+            if (code==technologyCode)
+                Console.WriteLine("true");
+        }
+
+        private static void test58()
+        {
+            Console.WriteLine("test58 entry");
+            Console.WriteLine("test58 exit");
         }
 
         private static List<string> RecombineQuotedStrings(string[] tokens)
