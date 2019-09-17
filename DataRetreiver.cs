@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace CSGitCack
@@ -17,42 +13,49 @@ namespace CSGitCack
             String command = "SELECT name,dob,company,position,thumbnail FROM viewpersonneltagunacknowledge";
             pobUnAcknowledgedGridView.DataSource = getDataTable(command);
         }
+
         // populate personnel that have been displayed in tag checkpoint
         public void populateAcknowledgedPersonnel(System.Windows.Forms.DataGridView pobOnSiteGridView, int gateID)
         {
             String command = "SELECT name,dob,company,position,thumbnail FROM viewpersonneltagacknowledge ORDER BY displayedwhen DESC";
             pobOnSiteGridView.DataSource = getDataTable(command);
         }
+
         // retrieve personnel details that is currently displayed
         public DataTable retrieveDisplayPersonnel(String tag)
         {
             String command = "SELECT ubisensetagid,name,dob,company,position,photograph,batterystatus,description FROM viewpersonnelwithtag WHERE ubisensetagid=" + tag;
             return getDataTable(command);
         }
+
         // return first person in queue
         public DataTable getFirstUndisplayedTag(int gateID)
         {
             String command = "SELECT TOP 1 ubisensetagid FROM viewubisensetagchecking WHERE displayed=0 AND id_gate=" + gateID;
             return getDataTable(command);
         }
+
         // retrieve vehiocle details that has that tag
         public DataTable getVehicleTag(String tag)
         {
             String command = "SELECT * FROM viewvehicle WHERE ubisensetagid=" + tag;
             return getDataTable(command);
         }
+
         // retrieve tag details
         public DataTable getTagBatteryStatus(String tag)
         {
             String command = "SELECT batterystatus,description FROM viewtag where id=" + tag;
             return getDataTable(command);
         }
+
         // retrieve maximum count allowed on site
         internal int getMaximumOnSite()
         {
             String command = "SELECT maximum FROM viewsitemaximum";
             return getTotalNumber(command);
         }
+
         // retrieve current count on plant
         public int retrieveTotalCount()
         {
@@ -82,6 +85,7 @@ namespace CSGitCack
                 {
                     Console.WriteLine(ex);
                 }
+
                 //close connection
                 closeConnection(SQLcon);
             }
@@ -113,6 +117,7 @@ namespace CSGitCack
             {
                 Console.WriteLine(ex);
             }
+
             //close connection
             closeConnection(SQLcon);
 
@@ -136,6 +141,7 @@ namespace CSGitCack
             {
                 Console.WriteLine(ex);
             }
+
             //close connection
             closeConnection(SQLcon);
 
@@ -158,6 +164,7 @@ namespace CSGitCack
 
             return SQLcon;
         }
+
         //close sql connection
         private void closeConnection(SqlConnection SQLcon)
         {
@@ -187,6 +194,7 @@ namespace CSGitCack
             {
                 Console.WriteLine(ex);
             }
+
             return connection;
         }
 
@@ -203,8 +211,10 @@ namespace CSGitCack
             {
                 Console.WriteLine(ex);
             }
+
             return timer;
         }
+
         public String getResourcesFile()
         {
             String resourceDirectory = "";
@@ -219,8 +229,10 @@ namespace CSGitCack
             {
                 Console.WriteLine(ex);
             }
+
             return resourceDirectory;
         }
+
         public String getReportDirectory()
         {
             String reportDirectory = "";
@@ -235,6 +247,7 @@ namespace CSGitCack
             {
                 Console.WriteLine(ex);
             }
+
             return reportDirectory;
         }
     }
