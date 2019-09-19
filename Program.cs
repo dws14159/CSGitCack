@@ -48,13 +48,26 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test60();
+                test63();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        private static void test63()
+        {
+            var ext= new String[]{ "cs","xaml","config","js","resx","tt","wxi","csproj","manifest","settings","wxs","edmx"};
+            int n = 1;
+            foreach (var str in ext)
+            {
+                Console.WriteLine($"grep -i \\.{str}[^^a-z] {n}.txt > {n}.{str}.txt");
+                Console.WriteLine($"grep -v -i \\.{str}[^^a-z] {n}.txt > {n+1}.txt");
+                //Console.WriteLine($"ext='{str}'");
+                n++;
             }
         }
 
