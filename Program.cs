@@ -70,6 +70,19 @@ namespace CSGitCack
             }
         }
 
+        private static void test68()
+        {
+            int ix = 0;
+            ix++;
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            ix++;
+            var _principal = new WindowsPrincipal(identity);
+            ix++;
+            ix++;
+            ix++;
+            ix++;
+        }
+
         private static void test67()
         {
             System.Media.SystemSounds.Beep.Play();
