@@ -70,6 +70,26 @@ namespace CSGitCack
             }
         }
 
+        private static void testJson(string hid, string pid)
+        {
+            var addr = Registry.GetValue("HKEY_LOCAL_MACHINE\\Software\\S3ID\\S3Configuration", "DesktopReaderUDPAddress", "")?.ToString();
+            var port = Registry.GetValue("HKEY_LOCAL_MACHINE\\Software\\S3ID\\S3Configuration", "DesktopReaderUDPPort", "")?.ToString();
+            if (string.IsNullOrEmpty(addr) || string.IsNullOrEmpty(port))
+            {
+                Console.WriteLine("addr or port is blank");
+            }
+            Console.WriteLine($"Reg UDP Address = '{addr}'");
+            Console.WriteLine($"Reg UDP Port = '{port}'");
+
+            string json = $"{{ \"HID\": \"{hid}\", \"PID\": \"{pid}\" }}";
+            Console.WriteLine(json);
+        }
+
+        private static void test65()
+        {
+            testJson("481", "50765");
+        }
+
         private static string SplitLongWord(string s)
         {
             string ret = s;
