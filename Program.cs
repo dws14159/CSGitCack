@@ -70,6 +70,11 @@ namespace CSGitCack
             }
         }
 
+        private static void test67()
+        {
+            System.Media.SystemSounds.Beep.Play();
+        }
+
         private static void test66() // need to run VS as Administrator
         {
             using (var searcher = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")))
