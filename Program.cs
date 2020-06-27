@@ -70,6 +70,21 @@ namespace CSGitCack
             }
         }
 
+        private static void test66() // need to run VS as Administrator
+        {
+            using (var searcher = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")))
+            //ManagementObjectSearcher(@"root\WMI", "SELECT * FROM MSSerial_PortName"))
+            {
+                using (ManagementObjectCollection objs = searcher.Get())
+                {
+                    foreach (var obj in objs)
+                    {
+                        Console.WriteLine(obj.ToString());
+                    }
+                }
+            }
+        }
+
         private static void testJson(string hid, string pid)
         {
             var addr = Registry.GetValue("HKEY_LOCAL_MACHINE\\Software\\S3ID\\S3Configuration", "DesktopReaderUDPAddress", "")?.ToString();
