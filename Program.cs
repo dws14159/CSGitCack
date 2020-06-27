@@ -83,6 +83,7 @@ namespace CSGitCack
             ix++;
         }
 
+
         private static void test67()
         {
             System.Media.SystemSounds.Beep.Play();
@@ -90,14 +91,32 @@ namespace CSGitCack
 
         private static void test66() // need to run VS as Administrator
         {
-            using (var searcher = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")))
-            //ManagementObjectSearcher(@"root\WMI", "SELECT * FROM MSSerial_PortName"))
+            using (var s2 = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")))
             {
-                using (ManagementObjectCollection objs = searcher.Get())
+                using (ManagementObjectCollection objs = s2.Get())
                 {
                     foreach (var obj in objs)
                     {
-                        Console.WriteLine(obj.ToString());
+                        if (!(obj is ManagementObject))
+                        {
+                            continue;
+                        }
+                        var propData = obj.Properties.Cast<PropertyData>();
+                        int props = obj.Properties.Cast<PropertyData>().Count(e => e.Name == "PortName" || e.Name == "InstanceName");
+                        if (props != 2) continue;
+
+                        Console.WriteLine("Keyboard Port found: " + obj["PortName"] + "\n" + obj["InstanceName"]);
+                        //_logService.LogEntry(0, "Keyboard Port found: " + obj["PortName"] + "\n" + obj["InstanceName"]);
+                        if (obj["InstanceName"].ToString().Contains(@"HID\VID_0C27&PID_3BFA"))
+                        {
+                            Console.WriteLine("Mifare Port added:" + obj["PortName"] + "\n" + obj["InstanceName"]);
+                            //_logService.LogEntry(0, "Mifare Port added:" + obj["PortName"] + "\n" + obj["InstanceName"]);
+                            //if (_mifarePort == null || (!_mifarePort.IsOpen || _mifarePort.IsDisposed))
+                            //{
+                            //    _mifarePorts.Add(new DesktopReaderPort(obj["PortName"].ToString()),
+                            //        obj["PortName"].ToString());
+                            //}
+                        }
                     }
                 }
             }
