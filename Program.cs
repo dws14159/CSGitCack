@@ -60,7 +60,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test64();
+                test69();
             }
             catch (Exception e)
             {
@@ -68,6 +68,35 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        private static void test69()
+        {
+            int results = 0;
+            for (int a = 1; a <= 2450; a++)
+            {
+                for (int b = a; b <= 2450; b++)
+                {
+                    int c = 2450 / (a * b);
+                    if (a * b * c == 2450 && a <= b && b <= c && c < 150)
+                    {
+                        int halfsum = (a + b + c) / 2;
+                        if (halfsum == 32)
+                        {
+                            Console.WriteLine($"Ages {a} {b} {c} prod={a * b * c} sum={a + b + c} halfsum={halfsum}");
+                            results++;
+                        }
+                        // Sum must be twice one of the ages
+                        //
+                        //if (halfsum == a || halfsum == b || halfsum == c)
+                        //{
+                        //    Console.WriteLine($"Ages {a} {b} {c} prod={a * b * c} sum={a + b + c}");
+                        //    results++;
+                        //}
+                    }
+                }
+            }
+            Console.WriteLine($"There were {results} results");
         }
 
         private static void test68()
