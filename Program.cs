@@ -60,7 +60,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test69();
+                test70();
             }
             catch (Exception e)
             {
@@ -68,6 +68,64 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        public class Roles
+        {
+            public const string OverviewOnly = "S3IDOverviewOnlyUser";
+            public const string ReadOnlyUser = "S3IDReadOnlyUser";
+            public const string MusterController = "S3IDMusterController";
+            public const string TagAndMusterManager = "S3IDTagAndMusterManager";
+            public const string SystemAdministrator = "S3IDSystemAdministrator";
+            public const string EngineeringAdministrator = "S3IDEngineeringAdministrator";
+        }
+
+        private static int UserLevel(string role)
+        {
+            switch (role)
+            {
+                case Roles.OverviewOnly: return 1;
+                case Roles.ReadOnlyUser: return 2;
+                case Roles.MusterController: return 3;
+                case Roles.TagAndMusterManager: return 4;
+                case Roles.SystemAdministrator: return 5;
+                case Roles.EngineeringAdministrator: return 6;
+                default: return -1;
+            }
+        }
+
+        public static bool AuthorizedForRole(string role, string UserGroup)
+        {
+            var currentLevel = UserLevel(UserGroup);
+            var desiredLevel = UserLevel(role);
+            if (currentLevel == -1 || desiredLevel == -1)
+            {
+                Console.WriteLine($"Calling AuthorizedForFeature({role})");
+                return false;
+            }
+            else
+                return currentLevel >= desiredLevel;
+        }
+
+        private static void test70()
+        {
+            string myGroup;
+
+            myGroup = Roles.SystemAdministrator;
+            Console.WriteLine("Can a sysadm get a MC feature? - " + (AuthorizedForRole(Roles.MusterController, myGroup) ? "YES" : "NO"));
+
+            myGroup = Roles.MusterController;
+            Console.WriteLine("Can an MC get a sysadm feature? - " + (AuthorizedForRole(Roles.SystemAdministrator, myGroup) ? "YES" : "NO"));
+
+            myGroup = Roles.TagAndMusterManager;
+            Console.WriteLine("Can a TAMM get a TAMM feature? - " + (AuthorizedForRole(Roles.TagAndMusterManager, myGroup) ? "YES" : "NO"));
+
+            myGroup = "wibble";
+            Console.WriteLine("My group is junk, can I get an OO feature? - " + (AuthorizedForRole(Roles.OverviewOnly, myGroup) ? "YES" : "NO"));
+            Console.WriteLine("My group is junk, can I get an SA feature? - " + (AuthorizedForRole(Roles.SystemAdministrator, myGroup) ? "YES" : "NO"));
+
+            myGroup = Roles.MusterController;
+            Console.WriteLine("My group is MC, can I get a junk feature? - " + (AuthorizedForRole("wibble", myGroup) ? "YES" : "NO"));
         }
 
         private static void test69()
