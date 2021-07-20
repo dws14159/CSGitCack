@@ -22,6 +22,7 @@ using System.Windows;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Win32;
+using System.Net;
 
 // UNC paths are not supported.  Defaulting to Windows directory.
 // To fix this, go to the project Properties -> Debug, change Working directory to somewhere on a local drive.
@@ -290,13 +291,22 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test71();
+                test72();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        private static void test72()
+        {
+            for (int i=7; i<12; i++)
+            {
+                string hex = i.ToString("X2");
+                Console.WriteLine($"i:[{i}] hex:[{hex}]");
             }
         }
 
