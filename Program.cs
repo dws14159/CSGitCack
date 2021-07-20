@@ -291,7 +291,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test73a();
+                test74a();
             }
             catch (Exception e)
             {
@@ -300,6 +300,39 @@ namespace CSGitCack
                 Console.ReadLine();
             }
         }
+
+        private static async Task<string> test74b()
+        {
+            Console.WriteLine("In the async");
+            var wc = new WebClient();
+            Console.WriteLine("Before the await");
+            var dsta = await wc.DownloadStringTaskAsync("http://www.google.com");
+            Console.WriteLine("After the await");
+            int len = dsta.Length;
+            return $"{len}";
+        }
+
+        private static void test74a()
+        {
+            // With async/await instead
+            Console.WriteLine("Start 74a");
+            Console.WriteLine("Call 74b");
+            var tsk = test74b();
+            Console.WriteLine("Back from 74b");
+            tsk.Wait();
+            Console.WriteLine($"After the wait - tsk.Result={tsk.Result}");
+        }
+
+        private static void test74()
+        {
+            var wc = new WebClient();
+            string page = "";
+            var tsk = Task.Run(() => page = wc.DownloadString("http://www.google.com"));
+            tsk.Wait();
+
+            Console.WriteLine($"Length is {page.Length}");
+        }
+
 
         private static void test73a()
         {
