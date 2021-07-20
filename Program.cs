@@ -291,13 +291,65 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test72();
+                test73a();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        private static void test73a()
+        {
+            // This is how I'd do it ...
+            for (int i = 1; i < 35; i++)
+            {
+                string output = "";
+
+                if ((i % 3) == 0)
+                    output += "Fizz";
+
+                if ((i % 5) == 0)
+                    output += "Buzz";
+
+                // ... because being able to add in something like this is much easier
+                if ((i % 6) == 0)
+                    output += "Gronk";
+
+                if (output == "")
+                    output = $"{i}";
+
+                Console.WriteLine(output);
+            }
+        }
+
+        private static void test73()
+        {
+            // note: I wouldn't actually do it this way. This is quite inflexible,
+            // because these keys could get quite long when we add more features.
+            // Fizz       f..f..f..f..f..
+            // Buzz       b....b....b....
+            // Wazz       w......
+            string key = "x..f.bf..fb.f..";
+            for (int i = 1; i <= 25; i++)
+            {
+                switch (key[i % key.Length])
+                {
+                    case 'f':
+                        Console.WriteLine("Fizz");
+                        break;
+                    case 'b':
+                        Console.WriteLine("Buzz");
+                        break;
+                    case 'x':
+                        Console.WriteLine("FizzBuzz");
+                        break;
+                    default:
+                        Console.WriteLine(i);
+                        break;
+                }
             }
         }
 
