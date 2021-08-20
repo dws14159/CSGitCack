@@ -301,6 +301,67 @@ namespace CSGitCack
             }
         }
 
+        // What if I'm the one doing a long running op?
+        private static async Task<int> test74e(int sleepTime)
+        {
+            Console.WriteLine("74e: Enter");
+            int result = 0;
+            await Task.Run(() =>
+            {
+                Console.WriteLine("74e: In the task");
+                for (int i = 0; i < 70; i++)
+                {
+                    if ((i % 15) == 0)
+                        Console.WriteLine($"74e: Loop up to {i}");
+                    Thread.Sleep(sleepTime); //simulate long calculation
+                    result += i;
+                }
+                Console.WriteLine("74e: After loop");
+            });
+            Console.WriteLine("74e: After the task");
+            return result;
+        }
+
+        private static async Task<int> test74d(int sleepTime)
+        {
+            Console.WriteLine("74d: Enter");
+            int result = 0;
+            await Task.Run(() =>
+            {
+                Console.WriteLine("74d: In the task");
+                for (int i = 0; i < 150; i++)
+                {
+                    if ((i % 20) == 0)
+                        Console.WriteLine($"74d: Loop up to {i}");
+                    Thread.Sleep(sleepTime); //simulate long calculation
+                    result += i;
+                }
+                Console.WriteLine("74d: After loop");
+            });
+            Console.WriteLine("74d: After the task");
+            return result;
+        }
+
+        private static async Task<int> test74c(int sleepTime)
+        {
+            Console.WriteLine("74c: Enter");
+            int result = 0;
+            await Task.Run(() =>
+            {
+                Console.WriteLine("74c: In the task");
+                for (int i = 0; i < 100; i++)
+                {
+                    if ((i % 10) == 0)
+                        Console.WriteLine($"74c: Loop up to {i}");
+                    Thread.Sleep(sleepTime); //simulate long calculation
+                    result += i;
+                }
+                Console.WriteLine("74c: After loop");
+            });
+            Console.WriteLine("74c: After the task");
+            return result;
+        }
+
         private static async Task<string> test74b()
         {
             Console.WriteLine("In the async");
@@ -315,12 +376,30 @@ namespace CSGitCack
         private static void test74a()
         {
             // With async/await instead
+            int sleepTime = 30;
+            var sw = new Stopwatch();
+            sw.Start();
             Console.WriteLine("Start 74a");
-            Console.WriteLine("Call 74b");
-            var tsk = test74b();
-            Console.WriteLine("Back from 74b");
-            tsk.Wait();
-            Console.WriteLine($"After the wait - tsk.Result={tsk.Result}");
+            var taskList = new List<Task<int>>();
+            Console.WriteLine("Call 74c");
+            taskList.Add(test74c(sleepTime));
+            Console.WriteLine("Back from 74c");
+            Console.WriteLine("Call 74d");
+            taskList.Add(test74d(sleepTime));
+            Console.WriteLine("Back from 74d");
+            Console.WriteLine("Call 74e");
+            taskList.Add(test74e(sleepTime));
+            Console.WriteLine("Back from 74e");
+            Task.WaitAll(taskList.ToArray());
+            sw.Stop();
+            long elapsed = sw.ElapsedMilliseconds;
+            long expected = sleepTime * 150; // that's d's iterations
+            Console.WriteLine($"Expected={expected}, elapsed={elapsed}, diff={elapsed-expected}");
+
+            foreach (Task<int> t in taskList)
+            {
+                Console.WriteLine($"Tasklist result: {t.Result}");
+            }
         }
 
         private static void test74()
