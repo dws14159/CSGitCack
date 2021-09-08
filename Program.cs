@@ -291,13 +291,102 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test74a();
+                test75();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        private static bool NearlyEqual(double a,double b)
+        {
+            return Math.Abs(Math.Abs(a) - Math.Abs(b)) < 0.01;
+        }
+
+        private static decimal Sqrt(decimal square)
+        {
+            if (square < 0) return 0;
+
+            decimal root = square / 3;
+            int i;
+            for (i = 0; i < 32; i++)
+                root = (root + square / root) / 2;
+            return root;
+        }
+
+        private static decimal AplusBsqrtC(decimal a, decimal b, decimal c)
+        {
+            decimal ret = a + b * Sqrt(c);
+            //Console.WriteLine($"AplusBsqrtC(a={a}, b={b}, c={c}) returns {ret}");
+            return ret;
+        }
+
+        // Calculate from the inside term outwards
+        // sqrt(G+F.sqrt(E+D.sqrt(C+B.sqrt(A))))
+        // Number of terms must be odd and at least 3
+        private static decimal test75a(int limit)
+        {
+            //Console.WriteLine($"Entering test75a(limit={limit})");
+
+            if (limit<3 || ((limit & 1) == 0))
+            {
+                //Console.WriteLine("Number of terms must be odd and at least 3");
+                return 0;
+            }
+
+            // Start with C+B.sqrt(A)
+            decimal dlimit = limit;
+            decimal total = AplusBsqrtC(dlimit - 2, dlimit - 1, dlimit);
+
+            // The next term is E+D.sqrt(previous result), hence -4
+            dlimit -= 4;
+            while (dlimit>=0)
+            {
+                total = AplusBsqrtC(dlimit, dlimit + 1, total);
+                // Next term is G+F.sqrt(previous result), hence -2
+                dlimit -= 2;
+            }
+            return total;
+        }
+
+        private static void testtest75a()
+        {
+            Console.WriteLine($"0 should throw an error and return 0: {test75a(0)}\n");
+            Console.WriteLine($"1 should throw an error and return 0: {test75a(1)}\n");
+            Console.WriteLine($"2 should throw an error and return 0: {test75a(2)}\n");
+            Console.WriteLine($"3 should return {1.0+2.0*Math.Sqrt(3.0)}: {test75a(3)}\n");
+            Console.WriteLine($"4 should throw an error and return 0: {test75a(4)}\n");
+            // .0+.0*Math.Sqrt(.0)
+            double res5 = 1.0 + 2.0 * Math.Sqrt(3.0 + 4.0 * Math.Sqrt(5.0));
+            Console.WriteLine($"5 should return {res5}: {test75a(5)}\n");
+            Console.WriteLine($"6 should throw an error and return 0: {test75a(6)}\n");
+            double res7 = 1.0 + 2.0 * Math.Sqrt(3.0 + 4.0 * Math.Sqrt(5.0 + 6.0 * Math.Sqrt(7.0)));
+            Console.WriteLine($"7 should return {res7}: {test75a(7)}\n");
+            Console.WriteLine($"8 should throw an error and return 0: {test75a(8)}\n");
+            double res9 = 1.0 + 2.0 * Math.Sqrt(3.0 + 4.0 * Math.Sqrt(5.0 + 6.0 * Math.Sqrt(7.0 + 8.0 * Math.Sqrt(9.0))));
+            Console.WriteLine($"9 should return {res9}: {test75a(9)}\n");
+            Console.WriteLine($"10 should throw an error and return 0: {test75a(10)}\n");
+            double res11 = 1.0 + 2.0 * Math.Sqrt(3.0 + 4.0 * Math.Sqrt(5.0 + 6.0 * Math.Sqrt(7.0 + 
+                8.0 * Math.Sqrt(9.0 + 10.0 * Math.Sqrt(11.0)))));
+            Console.WriteLine($"11 should return {res11}: {test75a(11)}\n");
+            Console.WriteLine($"12 should throw an error and return 0: {test75a(12)}\n");
+            double res13 = 1.0 + 2.0 * Math.Sqrt(3.0 + 4.0 * Math.Sqrt(5.0 + 6.0 * Math.Sqrt(7.0 +
+                8.0 * Math.Sqrt(9.0 + 10.0 * Math.Sqrt(11.0 + 12.0 * Math.Sqrt(13.0))))));
+            Console.WriteLine($"13 should return {res13}: {test75a(13)}\n");
+        }
+
+        // Infinitely nested square roots
+        // sqrt(1+2*sqrt(3+4*sqrt(5+6*sqrt(...
+        // Problem is: we have to calculate it from the inmost term
+        private static void test75()
+        {
+            //testtest75a();
+            for (int i=5; i<500; i+=2)
+            {
+                Console.WriteLine($"test75a({i}) returns {test75a(i)}");
             }
         }
 
