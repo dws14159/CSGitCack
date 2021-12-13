@@ -271,6 +271,13 @@ namespace CSGitCack
         public string NotLineNoise { get; set; }
     }
 
+    public class SimpleListThing
+    {
+        public int id { get; set; }
+        public string Name { get; set; }
+        public bool Flag { get; set; }
+    }
+
     static class Program
     {
         static void Main(string[] args)
@@ -291,7 +298,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test75();
+                test76();
             }
             catch (Exception e)
             {
@@ -299,6 +306,29 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        private static void test76()
+        {
+            // Does List.Add add a copy?
+            var myList = new List<SimpleListThing>();
+
+            var myThing = new SimpleListThing()
+            {
+                id = 1,
+                Name = "Bob",
+                Flag = false
+            };
+            Console.WriteLine($"myThing.Flag = {myThing.Flag}");
+            myList.Add(myThing);
+            // Now modify the thing in the list
+            myList[0].Flag = true;
+            Console.WriteLine($"myList[0].Flag = {myList[0].Flag}");
+            Console.WriteLine($"myThing.Flag = {myThing.Flag} - if true, List contains a reference; if false, List contains a copy"); // It was True!
+
+            // So if I modify myThing that should also change the thing in the list
+            myThing.Flag = false;
+            Console.WriteLine($"myList[0].Flag = {myList[0].Flag} - should be false"); // It was!
         }
 
         private static bool NearlyEqual(double a,double b)
