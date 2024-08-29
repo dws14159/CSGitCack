@@ -1842,18 +1842,18 @@ namespace CSGitCack
             Console.WriteLine($"'{strLaser}' installed: [{instLaser}]; '{strWibble}' installed: [{instWibble}]");
         }
 
-        private static void test25()
-        {
-            Geometry geom;
-            FormattedText ft;
-            System.Windows.Point whitespace;
-            string testStr = "";
-            Conversions.GetTextGeometryAndFormatting(testStr, "Arial", 12, false, false, new System.Windows.Point(0, 0),
-                System.Windows.Media.Colors.Black, out geom, out ft, out whitespace);
-            Console.WriteLine($"Width of test string '{testStr}' is {geom.Bounds.Width}");
-            Console.WriteLine(
-                $"So is this smaller than a rectangle of width 20? [{(geom.Bounds.Width < 20).ToString()}]");
-        }
+        //private static void test25()
+        //{
+        //    Geometry geom;
+        //    FormattedText ft;
+        //    System.Windows.Point whitespace;
+        //    string testStr = "";
+        //    Conversions.GetTextGeometryAndFormatting(testStr, "Arial", 12, false, false, new System.Windows.Point(0, 0),
+        //        System.Windows.Media.Colors.Black, out geom, out ft, out whitespace);
+        //    Console.WriteLine($"Width of test string '{testStr}' is {geom.Bounds.Width}");
+        //    Console.WriteLine(
+        //        $"So is this smaller than a rectangle of width 20? [{(geom.Bounds.Width < 20).ToString()}]");
+        //}
 
         private static void test24()
         {
