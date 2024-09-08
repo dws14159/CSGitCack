@@ -91,8 +91,10 @@ namespace CSGitCack
             }
 
             string measureString = Text;
+#pragma warning disable CS0618 // Type or member is obsolete
             ft = new FormattedText(measureString, CultureInfo.InvariantCulture,
                 System.Windows.FlowDirection.LeftToRight, tf, FontSize, br1);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // Problem is: we don't know what the space dimensions are.  So if we draw it at 0,0, then the bounding rectangle will start at x,y which indicates the space dimension.
             var geom1 = ft.BuildGeometry(new System.Windows.Point(0, 0));

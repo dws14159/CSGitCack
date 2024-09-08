@@ -23,6 +23,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Win32;
 using System.Net;
+using System.Data.SQLite;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -62,7 +63,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test78();
+                test91();
             }
             catch (Exception e)
             {
@@ -72,10 +73,429 @@ namespace CSGitCack
             }
         }
 
+        private static void test91()
+        {
+            string filePath = @"C:\YourFile.txt";
+
+            // Create a StreamWriter to write to the file
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                for (int i = 0; i < 10000; i++)
+                {
+                    writer.WriteLine($"{i:D4}"); // use leading zeros
+                }
+            }
+        }
+
+        // Blood Magic: suppose we have N capacity&augmented capacity runes.
+        // What is the maximum number M of capacity runes that gives the highest total capacity?
+        // Max is 108 runes and we want others, but we could go all the way up there. But we only need 200k cap at T5
+        private static void test90()
+        {
+            // n is the total number of C and AC runes
+            for (double n=1; n<=108; n++) 
+            {
+                // Reset maxCap for each new total number of runes
+                double maxCap = 0.0;
+                double maxC = 0.0, maxAC = 0.0;
+
+                // c is the number of capacity runes
+                for (double c=0; c<=n; c++)
+                {
+                    // ac is the number of augmented capacity runes
+                    double ac = n - c;
+
+                    // Capacity is (10K plus 2000*m) * 1.075^(n-m)
+                    double totalCap = (10000.0 + 2000.0 * c) * Math.Pow(1.075, ac);
+
+                    if (totalCap > maxCap)
+                    {
+                        maxCap = totalCap;
+                        maxC = c;
+                        maxAC= ac;
+                    }
+                }
+
+                Console.WriteLine($"For {n} runes the maximum capacity {maxCap} is achieved for {maxC} cap runes and {maxAC} augcap runes");
+            }
+        }
+
+        private static void test89()
+        {
+            int page = 0;
+
+            for (int a = 0; a <= 2021; a++)
+                for (int b = 0; b <= 2021; b++)
+                    for (int c = 0; c <= 2021; c++)
+                    {
+                        if (a * b + c == 2020 && a + b * c == 2021)
+                        {
+                            Console.WriteLine($"A={a}; B={b}; C={c}; a*b+c={a*b+c}; a+b*c={a+b*c}");
+                            page++;
+                            if (page > 30)
+                            {
+                                page = 0;
+                                Console.ReadLine();
+                            }
+                        }
+                    }
+        }
+
+        // LC Hard 233 - number of digit 1's
+        private static int CountDigitOneBasic(int n)
+        {
+            int num1s = 0;
+            for (int i = 1; i <= n; i++)
+            {
+                int junk = i;
+                while (junk != 0)
+                {
+                    if ((junk % 10) == 1)
+                    {
+                        num1s++;
+                    }
+                    junk /= 10;
+                }
+            }
+            return num1s;
+        }
+
+        private static int CountDigitOneVia999NoWorkee(int n)
+        {
+            int num1s = 0;
+            int mult = 1;
+            // We separately established there are 300 1's in 1-999 so let's use that.
+            if (n>999)
+            {
+                num1s = 300;
+                n /= 1000;
+                mult *= 1000;
+            }
+            while (n>999)
+            {
+                num1s *= 300*mult;
+                n /= 1000;
+                mult *= 1000;
+            }
+
+            // So let's now count what's left
+            for (int i = 1; i <= n; i++)
+            {
+                int junk = i;
+                while (junk != 0)
+                {
+                    if ((junk % 10) == 1)
+                    {
+                        num1s+=mult;
+                    }
+                    junk /= 10;
+                }
+            }
+            return num1s;
+        }
+
+        private static int CountDigitOneVia99(int n)
+        {
+            int num1s = 0;
+            int mult = 1;
+
+            // The number of 1s in 00-99 is 20.
+            while (n>99)
+            {
+                num1s += 20 * mult;
+                mult *= 100;
+                n /= 100;
+            }
+            if (n < 10) num1s += mult;
+            else if (n < 20) num1s += (n - 10) * mult;
+            else num1s += (n / 10 - 2) * mult;
+
+            return num1s;
+        }
+
+        /* Ladies and gentlemen we have a winner
+         * Number of 1s we get from the units digit is what's on its left, plus 1 if the units digit is >=1
+         * Number of 1s we get from the 10s digit is what's on its left *10 plus: ???
+         * Number of 1s we get from the 100s digit is what's on its left *100 plus: nothing if it's 0; 100 if it's >1; (%100)+1 if it's 1
+         *
+         * So: number of 1s we get from the N digit is what's on its left * N plus: nothing if it's 0; N if it's >1; (orig % N)+1 if it's 1
+         */
+
+        private static int CountDigitOneViaReels(int n)
+        {
+            int num1s = 0;
+            for (int mult=1; mult<=n; mult*=10)
+            {
+                // Number of 1s we get from the "mult" digit is what's on its left...
+                int left = n / (mult * 10);
+                num1s += left*mult;
+
+                int right= n % (mult);
+
+                int digit = (n - left * mult * 10 - right) / mult;
+
+                if (digit>1)
+                {
+                    // ... if digit>1 then plus mult
+                    num1s += mult;
+                }
+                else if (digit==1)
+                {
+                    // ... if digit==1 then plus (orig%mult)+1
+                    num1s += (n % mult) + 1;
+                }
+            }
+            return num1s;
+        }
+
+        private static void test85()
+        {
+            int[] tests = { 0, 1, 2, 15684, 100000 }; //, 15084, 15184, 15101, 9999999, 99999999 };
+
+            using (var logFile = File.AppendText("C:\\test85.log"))
+            {
+                logFile.AutoFlush = true;
+
+                foreach (int test in tests)
+                {
+                    Console.WriteLine($"Basic check: Number of 1s up to {test} is {CountDigitOneBasic(test)}");
+                    Console.WriteLine($"Reels check: Number of 1s up to {test} is {CountDigitOneViaReels(test)}");
+                    Console.WriteLine();
+
+                    logFile.WriteLine($"Basic check: Number of 1s up to {test} is {CountDigitOneBasic(test)}");
+                    logFile.WriteLine($"Reels check: Number of 1s up to {test} is {CountDigitOneViaReels(test)}");
+                    logFile.WriteLine();
+                }
+            }
+            ;
+            //for (int j = 10; j < 100000; j *= 10)
+            //{
+            //    for (int i = 1; i < 10; i++)
+            //    {
+            //        Console.WriteLine($"Basic check: Number of 1s up to {i * j} is {CountDigitOneBasic(i * j)}");
+            //    }
+            //}
+            //for (int i = 100; i <= 5000; i += 100)
+            //{
+            //    Console.WriteLine($"Basic check: Number of 1s up to {i} is {CountDigitOneBasic(i)}");
+            //}
+            //Console.WriteLine();
+            //for (int i = 198; i<212; i++)
+            //{
+            //    Console.WriteLine($"Basic check: Number of 1s up to {i} is {CountDigitOneBasic(i)}");
+            //}
+
+            //Console.WriteLine($"Basic check: Number of 1s up to 9 is {CountDigitOneBasic(9)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 99 is {CountDigitOneBasic(99)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 999 is {CountDigitOneBasic(999)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 9999 is {CountDigitOneBasic(9999)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 99999 is {CountDigitOneBasic(99999)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 999999 is {CountDigitOneBasic(999999)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 9999999 is {CountDigitOneBasic(9999999)}");
+            //Console.WriteLine();
+            //Console.WriteLine($"Basic check: Number of 1s up to 10 is {CountDigitOneBasic(10)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 100 is {CountDigitOneBasic(100)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 1000 is {CountDigitOneBasic(1000)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 10000 is {CountDigitOneBasic(10000)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 100000 is {CountDigitOneBasic(100000)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 1000000 is {CountDigitOneBasic(1000000)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 10000000 is {CountDigitOneBasic(10000000)}");
+            //Console.WriteLine($"Basic check: Number of 1s up to 100000000 is {CountDigitOneBasic(100000000)}");
+            //Console.WriteLine();
+            //Console.WriteLine($"Basic check: Number of 1s up to 15684 is {CountDigitOneBasic(15684)}");
+
+
+            //int target = 99;
+            //int result = 20;
+            //Console.WriteLine($"Basic check: Number of 1s up to {target} is {CountDigitOneBasic(target)} (should be {result})");
+            //Console.WriteLine($"Number of 1s up to {target} is {CountDigitOneVia99(target)} (should be {result})");
+            //Console.WriteLine();
+
+            //target = 100;
+            //result = 21;
+            //Console.WriteLine($"Basic check: Number of 1s up to {target} is {CountDigitOneBasic(target)} (should be {result})");
+            //Console.WriteLine($"Number of 1s up to {target} is {CountDigitOneVia99(target)} (should be {result})");
+            //Console.WriteLine();
+
+
+            //Console.WriteLine($"Basic check: Number of 1s up to 999 is {CountDigitOneBasic(999)} (should be 300)");
+
+            //Console.WriteLine($"Number of 1s up to 999 is {CountDigitOne(999)} (should be 300)");
+            //Console.WriteLine($"Number of 1s up to 1,500,000 is {CountDigitOne(1500000)} (should be ..?)");
+            //Console.WriteLine($"Number of 1s up to 13 is {CountDigitOne(13)} (should be 6)");
+            //Console.WriteLine($"Number of 1s up to 0 is {CountDigitOne(0)} (should be 0)");
+            //Console.WriteLine($"Basic check: Number of 1s up to 1,000,000 is {CountDigitOneBasic(1000000)} (should be 9(0...?)1");
+            //Console.WriteLine($"Number of 1s up to 1,000,000 is {CountDigitOne(1000000)} (should be 9(0...?)1");
+            //Console.WriteLine($"Number of 1s up to 1,000,000,000 is {CountDigitOne(1000000000)} (should be 9(0...?)1");
+        }
+
+        public static int FirstMissingPositive(int[] nums)
+        {
+            var flags = new int[10000];
+            foreach (int num in nums)
+            {
+                if (num >= 1 && num <= 10000)
+                    flags[num - 1] = 1;
+            }
+            int foundAt = -1;
+            for (int i=0; i<10000; i++)
+            {
+                if (flags[i]==0)
+                {
+                    foundAt = i + 1;
+                    break;
+                }
+            }
+            return foundAt == -1 ? 10001 : foundAt;
+        }
+
+        // First missing positive, Leetcode 41
+        // Testcase 171 is incorrect because of the constraint "1 <= nums.length <= 10^5" but the input contains 99,999 commas, exceeding the constraint by a factor of 10.
+        private static void test84()
+        {
+            Console.WriteLine($"First missing positive for [1,2,0] is {FirstMissingPositive(new int[] { 1, 2, 0 })}");
+            Console.WriteLine($"First missing positive for [3,4,-1,1] is {FirstMissingPositive(new int[] { 3, 4, -1, 1 })}");
+            Console.WriteLine($"First missing positive for [7,8,9,11,12] is {FirstMissingPositive(new int[] { 7, 8, 9, 11, 12 })}");
+        }
+
+        // Find all positive integers for a,b and c for abc=a+b+c+7
+        private static void test83()
+        {
+            for (int a=1; a<500; a++)
+                for (int b=1; b<500; b++)
+                    for (int c=1; c<500; c++)
+                    {
+                        if (a*b*c == a+b+c+7)
+                            Console.WriteLine($"a={a}, b={b}, c={c}");
+                    }
+        }
+
+        // There are 112 grams of powder. Two people need to split the cost. Person #1 takes 3.84 grams each time,
+        // person #2 takes 3.04 grams each time until there is no powder left. How much of the bag did each person
+        // take, percentage wise maybe?
+
+        // 112/3=38
+        private static void test82()
+        {
+            for (int x=1; x<=38; x++)
+            {
+                for (int y=1; y<=38; y++)
+                {
+                    double val = (double)x * 3.84 + (double)y * 3.04;
+                    if (NearlyEqual(val, 112, 0.0001))
+                    {
+                        Console.WriteLine($"Found solution x={x} * 3.84 + y={y} * 3.04 = {val}");
+                    }
+                }
+            }
+        }
+
+        private static void test81()
+        {
+            long cachedSize = 1023 * 1048576;
+            long fi_length = 2 * 1048576;
+            int MaxMB = 1024;
+
+
+            if (cachedSize + fi_length > MaxMB * 1048576)
+            {
+                Console.WriteLine("SmallThing is too big");
+            }
+            ;
+        }
+
+        private static string GetRandomFileName(string template)
+        {
+            var rng = new Random();
+            while(true)
+            {
+                string filename = string.Format(template, rng.Next(100000, 1000000));
+                if (!File.Exists(filename))
+                    return filename;
+            }
+        }
+
+        private static int GapSpotter(List<int> list)
+        {
+            int current = 1;
+            foreach (int ext in list)
+            {
+                if (current != ext)
+                    return current;
+
+                current++;
+            }
+            return current;
+        }
+
+        // Check the gap spotter works
+        private static void test80()
+        {
+            var emptyList = new List<int>();
+            Console.WriteLine($"Empty list should return 1 --> {GapSpotter(emptyList)}");
+
+            var List1 = new List<int>() { 1 };
+            Console.WriteLine($"List1 should return 2 --> {GapSpotter(List1)}");
+
+            var List12 = new List<int>() { 1, 2 };
+            Console.WriteLine($"List12 should return 3 --> {GapSpotter(List12)}");
+
+            var List1245 = new List<int>() { 1, 2, 4, 5 };
+            Console.WriteLine($"List1245 should return 3 --> {GapSpotter(List1245)}");
+
+            var List2345 = new List<int>() { 2, 3, 4, 5 };
+            Console.WriteLine($"List2345 should return 1 --> {GapSpotter(List2345)}");
+
+            var List12345 = new List<int>() { 1, 2, 3, 4, 5 };
+            Console.WriteLine($"List12345 should return 6 --> {GapSpotter(List12345)}");
+
+            var List125689 = new List<int>() { 1, 2, 5, 6, 8, 9 };
+            Console.WriteLine($"List125689 should return 3 --> {GapSpotter(List125689)}");
+        }
+
+
+        // Can I cast a boxed double directly to an int?
+        // No, it throws System.InvalidCastException - Specified cast is not valid.
+        private static void test79()
+        {
+            double d = 3;
+            object boxedDouble = d;
+
+            int unboxedInt = (int)(double)boxedDouble;
+            Console.WriteLine($"unboxed int={unboxedInt}");
+
+            var now = DateTime.Now;
+            object boxedDate = now;
+
+            double d2 = 3.14159;
+            object boxedDouble2 = d2;
+
+            string str = "Hello";
+            object boxedStr = str;
+
+            string str1=boxedDate.ToString();
+            string str2=boxedDouble2.ToString();
+            string str3 = boxedStr.ToString();
+
+            ;
+        }
+
         // Understanding SQLite
         private static void test78()
         {
+            try
+            {
+                var fn = GetRandomFileName("F:\\MiscJunk\\_0\\TempDBFiles\\sqlite{0}.db");
+                Console.WriteLine($"File name: {fn}");
 
+                var con = new SQLiteConnection("Data Source={fn}");
+                var cmd=new SQLiteCommand("CREATE TABLE PEOPLE()", con);
+                // System.Data.SqlClient System.Data.Sqlite.Core Dapper
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         // Understanding the Registry
@@ -119,9 +539,9 @@ namespace CSGitCack
             Console.WriteLine($"myList[0].Flag = {myList[0].Flag} - should be false"); // It was!
         }
 
-        private static bool NearlyEqual(double a,double b)
+        private static bool NearlyEqual(double a,double b,double epsilon=0.01)
         {
-            return Math.Abs(Math.Abs(a) - Math.Abs(b)) < 0.01;
+            return Math.Abs(Math.Abs(a) - Math.Abs(b)) < epsilon;
         }
 
         private static decimal Sqrt(decimal square)
