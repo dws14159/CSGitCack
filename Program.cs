@@ -16,6 +16,7 @@ using System.Globalization;
 using System.Data;
 using System.Data.SqlClient;
 using System.Net.Http;
+using System.Security.Principal;
 using System.Threading;
 using System.Windows;
 using System.Xml;
@@ -28,6 +29,17 @@ using Microsoft.Win32;
 
 namespace CSGitCack
 {
+    //interface MiObservable
+    //{
+    //    void Notify();
+    //}
+    //public class ConcreteObservable : MiObservable
+    //{
+    //    // Non-public method 'Notify' cannot implement method from interface MiObservable
+    //    private void Notify() { } 
+    //}
+
+
     static class Program
     {
         static void Main(string[] args)
@@ -48,7 +60,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test63();
+                test68();
             }
             catch (Exception e)
             {
@@ -56,6 +68,92 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        private static void test68()
+        {
+            int ix = 0;
+            ix++;
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            ix++;
+            var _principal = new WindowsPrincipal(identity);
+            ix++;
+            ix++;
+            ix++;
+            ix++;
+        }
+
+        private static void test67()
+        {
+            System.Media.SystemSounds.Beep.Play();
+        }
+
+        private static void test66() // need to run VS as Administrator
+        {
+            using (var searcher = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")))
+            //ManagementObjectSearcher(@"root\WMI", "SELECT * FROM MSSerial_PortName"))
+            {
+                using (ManagementObjectCollection objs = searcher.Get())
+                {
+                    foreach (var obj in objs)
+                    {
+                        Console.WriteLine(obj.ToString());
+                    }
+                }
+            }
+        }
+
+        private static void testJson(string hid,string pid)
+        {
+            var addr = Registry.GetValue("HKEY_LOCAL_MACHINE\\Software\\S3ID\\S3Configuration", "DesktopReaderUDPAddress", "")?.ToString();
+            var port = Registry.GetValue("HKEY_LOCAL_MACHINE\\Software\\S3ID\\S3Configuration", "DesktopReaderUDPPort", "")?.ToString();
+            if (string.IsNullOrEmpty(addr) || string.IsNullOrEmpty(port))
+            {
+                Console.WriteLine("addr or port is blank");
+            }
+            Console.WriteLine($"Reg UDP Address = '{addr}'");
+            Console.WriteLine($"Reg UDP Port = '{port}'");
+
+            string json = $"{{ \"HID\": \"{hid}\", \"PID\": \"{pid}\" }}";
+            Console.WriteLine(json);
+        }
+
+        private static void test65()
+        {
+            testJson("481", "50765");
+        }
+
+        private static string SplitLongWord(string s)
+        {
+            string ret = s;
+            if (s.Length > 8)
+            {
+                ret = "";
+                foreach (var c in s)
+                {
+                    ret += c;
+                    ret += '-'; // (char)0xAD; // soft hyphen
+                }
+            }
+
+            return ret;
+        }
+
+        // Split long strings
+        private static void test64()
+        {
+            string pfn = "Herman Barend Cornelis";
+            string pln = "Nieuwenhuiduiluiandbobthebuilderzen";
+            string s = string.Format("{0} {1}", pfn, pln);
+            // string s = "Phthaoulmnoarhquiaunkc The Unpronounceable";
+            var s1 = s.Split(' ');
+            var s2 = "";
+            foreach (var v in s1)
+            {
+                s2 += SplitLongWord(v) + " ";
+            }
+
+            Console.WriteLine(s2);
         }
 
         private static void test63()
