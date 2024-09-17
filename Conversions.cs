@@ -72,38 +72,40 @@ namespace CSGitCack
         }
         // test25: What does GetTextGeometryAndFormatting do if the text is empty?
         // Ans: Bounds.Width=-Inf.  Bounds.Width < 20 returns TRUE.
-        public static void GetTextGeometryAndFormatting(string Text, string Font, double FontSize, bool Italics, bool Bold,
-            System.Windows.Point Location, System.Windows.Media.Color Colour, out Geometry geom, out FormattedText ft,
-            out System.Windows.Point whitespace)
-        {
-            var tf = new Typeface(new System.Windows.Media.FontFamily(Font),
-                Italics ? FontStyles.Italic : FontStyles.Normal,
-                Bold ? FontWeights.Bold : FontWeights.Normal,
-                FontStretches.Normal);
-            var br1 = new SolidColorBrush();
-            try
-            {
-                br1.Color = Colour;
-            }
-            catch
-            {
-                br1.Color = System.Windows.Media.Color.FromArgb(255, 0, 0, 0);
-            }
-
-            string measureString = Text;
-            ft = new FormattedText(measureString, CultureInfo.InvariantCulture,
-                System.Windows.FlowDirection.LeftToRight, tf, FontSize, br1);
-
-            // Problem is: we don't know what the space dimensions are.  So if we draw it at 0,0, then the bounding rectangle will start at x,y which indicates the space dimension.
-            var geom1 = ft.BuildGeometry(new System.Windows.Point(0, 0));
-            // geom1.Bounds.TopLeft is now the width and height of the whitespace
-
-            // Rebuild the geometry to discard the whitespace and offset by this.(x,y), because for general use elsewhere we want geom.Bounds to indicate the drawn text area
-            whitespace = geom1.Bounds.TopLeft; // draw however still needs to be able to take this into account
-            System.Windows.Point offset =
-                new System.Windows.Point(whitespace.X * -1 + Location.X, whitespace.Y * -1 + Location.Y);
-            geom = ft.BuildGeometry(offset);
-        }
-
+        //public static void GetTextGeometryAndFormatting(string Text, string Font, double FontSize, bool Italics, bool Bold,
+        //    System.Windows.Point Location, System.Windows.Media.Color Colour, out Geometry geom, out FormattedText ft,
+        //    out System.Windows.Point whitespace)
+        //{
+        //    var tf = new Typeface(new System.Windows.Media.FontFamily(Font),
+        //        Italics ? FontStyles.Italic : FontStyles.Normal,
+        //        Bold ? FontWeights.Bold : FontWeights.Normal,
+        //        FontStretches.Normal);
+        //    var br1 = new SolidColorBrush();
+        //    try
+        //    {
+        //        br1.Color = Colour;
+        //    }
+        //    catch
+        //    {
+        //        br1.Color = System.Windows.Media.Color.FromArgb(255, 0, 0, 0);
+        //    }
+        //
+        //    string measureString = Text;
+        //
+        //    // Next line throws:
+        //    // 1>C:\_Dave\TBS\Dev\CSGitCack\Conversions.cs(94,18,95,77): warning CS0618: 'FormattedText.FormattedText(string, CultureInfo, FlowDirection, Typeface, double, Brush)' is /obsolete: /'Use the PixelsPerDip override'
+        //    ft = new FormattedText(measureString, CultureInfo.InvariantCulture,
+        //        System.Windows.FlowDirection.LeftToRight, tf, FontSize, br1);
+        //
+        //    // Problem is: we don't know what the space dimensions are.  So if we draw it at 0,0, then the bounding rectangle will start at x,y which indicates the space dimension.
+        //    var geom1 = ft.BuildGeometry(new System.Windows.Point(0, 0));
+        //    // geom1.Bounds.TopLeft is now the width and height of the whitespace
+        //
+        //    // Rebuild the geometry to discard the whitespace and offset by this.(x,y), because for general use elsewhere we want geom.Bounds to indicate the drawn text area
+        //    whitespace = geom1.Bounds.TopLeft; // draw however still needs to be able to take this into account
+        //    System.Windows.Point offset =
+        //        new System.Windows.Point(whitespace.X * -1 + Location.X, whitespace.Y * -1 + Location.Y);
+        //    geom = ft.BuildGeometry(offset);
+        //}
     }
 }
