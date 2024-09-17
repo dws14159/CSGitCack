@@ -63,13 +63,46 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test91();
+                test92();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        // Benoit's age and house number
+        // https://www.youtube.com/watch?v=i3zOm7_e9xU
+        private static void test92()
+        {
+            for (int age = 1; age < 150; age++)
+            {
+                for (int numHouses = 3; numHouses < 500; numHouses++)
+                {
+                    for (int bensHouse = 1; bensHouse <= numHouses; bensHouse++)
+                    {
+                        // Sum of house numbers
+                        double SHN = 0.0;
+                        for (int i = 1; i <= numHouses; i++)
+                            SHN += i;
+
+                        // Deduct Ben's house
+                        SHN -= bensHouse;
+
+                        // Average of all houses except Ben's
+                        SHN /= (numHouses - 1);
+
+                        // Add Ben's age
+                        SHN += age;
+
+                        if (NearlyEqual(SHN, 20.16, 0.0001))
+                        {
+                            Console.WriteLine($"Found possible solution: age={age}; numHouses={numHouses}; Ben's house={bensHouse}; SHN={SHN}");
+                        }
+                    }
+                }
             }
         }
 
