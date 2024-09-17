@@ -62,7 +62,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test69();
+                test92();
             }
             catch (Exception e)
             {
