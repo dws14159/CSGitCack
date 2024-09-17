@@ -11,19 +11,17 @@ using System.Printing;
 using System.Management;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media;
-using System.Globalization;
 using System.Data;
 using System.Data.SqlClient;
 using System.Net.Http;
 using System.Security.Principal;
 using System.Threading;
-using System.Windows;
 using System.Xml;
 using System.Xml.Serialization;
+using ExcelDataReader;
 using Microsoft.Win32;
 using System.Net;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -42,6 +40,7 @@ namespace CSGitCack
     //    // Non-public method 'Notify' cannot implement method from interface MiObservable
     //    private void Notify() { } 
     //}
+
 
     static class Program
     {
@@ -63,7 +62,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test92();
+                test69();
             }
             catch (Exception e)
             {
@@ -73,6 +72,38 @@ namespace CSGitCack
             }
         }
 
+        private static void test93()
+        {
+            using (var stream = File.Open("C:\\Users\\david.spencer\\Documents\\S3 ID PTS Excel Import Template.xlsx",
+                FileMode.Open, FileAccess.Read))
+            using (var reader = ExcelReaderFactory.CreateReader(stream))
+            {
+                int ix = 0;
+                ix++;
+                ix++;
+                var result = reader.AsDataSet();
+                var table0 = result.Tables[0];
+                foreach (DataRow row in table0.Rows)
+                {
+                    string s = "";
+                    foreach (var v in row.ItemArray)
+                    {
+                        s += v.ToString() + " - ";
+                    }
+
+                    Console.WriteLine(s);
+                    ix++;
+                    ix++;
+                    ix++;
+                    ix++;
+                }
+                var table1 = result.Tables[1];
+                foreach (DataRow row in table1.Rows)
+                {
+                }
+            }
+        }
+    
         // Benoit's age and house number
         // https://www.youtube.com/watch?v=i3zOm7_e9xU
         private static void test92()
@@ -126,14 +157,14 @@ namespace CSGitCack
         private static void test90()
         {
             // n is the total number of C and AC runes
-            for (double n=1; n<=108; n++) 
+            for (double n = 1; n <= 108; n++)
             {
                 // Reset maxCap for each new total number of runes
                 double maxCap = 0.0;
                 double maxC = 0.0, maxAC = 0.0;
 
                 // c is the number of capacity runes
-                for (double c=0; c<=n; c++)
+                for (double c = 0; c <= n; c++)
                 {
                     // ac is the number of augmented capacity runes
                     double ac = n - c;
@@ -145,7 +176,7 @@ namespace CSGitCack
                     {
                         maxCap = totalCap;
                         maxC = c;
-                        maxAC= ac;
+                        maxAC = ac;
                     }
                 }
 
@@ -521,8 +552,8 @@ namespace CSGitCack
                 var fn = GetRandomFileName("F:\\MiscJunk\\_0\\TempDBFiles\\sqlite{0}.db");
                 Console.WriteLine($"File name: {fn}");
 
-                var con = new SQLiteConnection("Data Source={fn}");
-                var cmd=new SQLiteCommand("CREATE TABLE PEOPLE()", con);
+                var con = new SqliteConnection("Data Source={fn}");
+                var cmd=new SqliteCommand("CREATE TABLE PEOPLE()", con);
                 // System.Data.SqlClient System.Data.Sqlite.Core Dapper
             }
             catch (Exception e)
@@ -655,7 +686,7 @@ namespace CSGitCack
         private static void test75()
         {
             //testtest75a();
-            for (int i=5; i<500; i+=2)
+            for (int i = 5; i < 500; i += 2)
             {
                 Console.WriteLine($"test75a({i}) returns {test75a(i)}");
             }
@@ -754,7 +785,7 @@ namespace CSGitCack
             sw.Stop();
             long elapsed = sw.ElapsedMilliseconds;
             long expected = sleepTime * 150; // that's d's iterations
-            Console.WriteLine($"Expected={expected}, elapsed={elapsed}, diff={elapsed-expected}");
+            Console.WriteLine($"Expected={expected}, elapsed={elapsed}, diff={elapsed - expected}");
 
             foreach (Task<int> t in taskList)
             {
@@ -827,7 +858,7 @@ namespace CSGitCack
 
         private static void test72()
         {
-            for (int i=7; i<12; i++)
+            for (int i = 7; i < 12; i++)
             {
                 string hex = i.ToString("X2");
                 Console.WriteLine($"i:[{i}] hex:[{hex}]");
@@ -949,7 +980,6 @@ namespace CSGitCack
             ix++;
         }
 
-
         private static void test67()
         {
             System.Media.SystemSounds.Beep.Play();
@@ -957,9 +987,9 @@ namespace CSGitCack
 
         private static void test66() // need to run VS as Administrator
         {
-            using (var s2 = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")))
+            using (var searcher = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")))
             {
-                using (ManagementObjectCollection objs = s2.Get())
+                using (ManagementObjectCollection objs = searcher.Get())
                 {
                     foreach (var obj in objs)
                     {
