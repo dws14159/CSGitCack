@@ -62,13 +62,22 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test92();
+                test94();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        private static void test94()
+        {
+            // TDF page generator
+            for (int i = 1; i < 100; i++)
+            {
+                Console.WriteLine($"Page {i:D2}: &start={15 * i}");
             }
         }
 
