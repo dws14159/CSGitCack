@@ -62,7 +62,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test94();
+                test95();
             }
             catch (Exception e)
             {
@@ -72,6 +72,22 @@ namespace CSGitCack
             }
         }
 
+        // https://www.youtube.com/watch?v=siyw_yBnFww
+        // N is a 3-digit number. The digits of N can be swapped around to make five more numbers
+        // If those five numbers are added up they make 2022. What is N? Ans: 642
+        private static void test95()
+        {
+            for (int a=1; a<=9; a++)
+                for (int b=1; b<=9; b++)
+                    for (int c=1; c<=9; c++)
+                    {
+                        if ((a+2*b+2*c)*100 + 
+                            (a*2+b+c*2)*10 +
+                            (a*2+b*2+c) == 2022)
+                            Console.WriteLine($"Found a solution a={a}, b={b}, c={c}");
+                    }
+        }
+            
         private static void test94()
         {
             // TDF page generator
