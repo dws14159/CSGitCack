@@ -111,6 +111,7 @@
     <Compile Include="LockTest2.cs" />
     <Compile Include="LTWSConfig.cs" />
     <Compile Include="MemLeak.cs" />
+    <Compile Include="MyPoint.cs" />
     <Compile Include="ParityStuff.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="PrimeStuff.cs" />
