@@ -41,6 +41,10 @@ namespace CSGitCack
     //    private void Notify() { } 
     //}
 
+    public class MyPointTester
+    {
+        public readonly MyPoint myPoint = new MyPoint{X=5, Y=10};
+    }
 
     static class Program
     {
@@ -62,7 +66,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test95();
+                test98();
             }
             catch (Exception e)
             {
@@ -70,6 +74,34 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        private static void test98()
+        {
+            for (int i=11; i<30; i++)
+            {
+                // Display Inf09_0NN format
+                Console.WriteLine($"mkdir Inf09_0{i:D2}");
+            }
+        }
+
+        private static void test97()
+        {
+            string missingFile= "C:\\ThisFileDoesNotExist.txt";
+
+            DateTime lastWriteTime = File.GetLastWriteTime(missingFile);
+            Console.WriteLine($"Last write time of {missingFile} is {lastWriteTime}");
+        }
+
+        private static void test96()
+        {
+            // https://www.youtube.com/watch?v=_ceGKgNWFXw
+            // 9: structs are immutable?
+
+            var mpt = new MyPointTester();
+            Console.WriteLine($"Before: {mpt.myPoint.X}, {mpt.myPoint.Y}");
+            mpt.myPoint.Move(10, 10);
+            Console.WriteLine($"After: {mpt.myPoint.X}, {mpt.myPoint.Y}");
         }
 
         // https://www.youtube.com/watch?v=siyw_yBnFww
