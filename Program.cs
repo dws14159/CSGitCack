@@ -66,13 +66,91 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test98();
+                test101();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
+            }
+        }
+
+        // Maximise a*b + b*c + c*d given a+b+c+d=63
+        // https://www.youtube.com/watch?v=0Ai9ygHu3L4
+        private static void test101()
+        {
+            int maxProduct = 0;
+            for (int a = 1; a < 64; a++)
+            {
+                for (int b = 1; b < 64; b++)
+                {
+                    for (int c = 1; c < 64; c++)
+                    {
+                        int d = 63 - a - b - c;
+                        if (d > 0 && a * b + b * c + c * d > maxProduct)
+                        {
+                            maxProduct = a * b + b * c + c * d;
+                            Console.WriteLine($"Found a potential solution: a={a}, b={b}, c={c}, d={d}, maxProduct={maxProduct}");
+                        }
+                        if (a==63 && b==63 && c==63)
+                        {
+                            Console.WriteLine("a==63 && b==63 && c==63");
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void test100()
+        {
+            for (int max=2; max<=55; max++)
+            {
+                double result = Math.Sqrt(1+max);
+                for (int i=max-1; i>1; i--)
+                {
+                    result = Math.Sqrt(result * i + 1);
+                }
+                Console.WriteLine($"At iteration {max} result={result} squared={result*result}");
+            }
+        }
+
+        private static string OpenWebPage(string url)
+        {
+            using (var client = new WebClient())
+            {
+                return client.DownloadString(url);
+            }
+        }
+
+        private static bool isEven(int number)
+        {
+            bool result = true;
+
+            while (number < 0)
+            {
+                number = number - 1;
+                if (result == true)
+                    result = false;
+                else
+                    result = true;
+            }
+            while (number > 0)
+            {
+                number = number - 1;
+                if (result == true)
+                    result = false;
+                else
+                    result = true;
+            }
+            return result;
+        }
+
+        private static void test99()
+        {
+            foreach (var testval in new[] { 4, 5, -4, -5 })
+            {
+                Console.WriteLine($"isEven({testval}) = {isEven(testval)}");
             }
         }
 
