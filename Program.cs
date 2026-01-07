@@ -66,7 +66,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test101();
+                test103();
             }
             catch (Exception e)
             {
@@ -74,6 +74,79 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        private static void test103()
+        {
+            // Input file is C:\_Dave\NotInfDisk\MiscJunk\words5.txt
+            // Output file is C:\_Dave\NotInfDisk\MiscJunk\words5_binary.txt
+            // Each line in the output file is a 26-bit binary number representing which letters are present in the corresponding word in the input file
+            // Case is not significant
+            // Only words with five unique letters can pass
+            // Duplicates are not allowed so if "abode" and "adobe" are present in the input then the output will only contain one occurrence of 11011000000000100000000000
+            // The most significant bit is 'A' and the least significant bit is 'Z'
+            string inputFile = @"C:\_Dave\NotInfDisk\MiscJunk\words5.txt";
+            string outputFile = @"C:\_Dave\NotInfDisk\MiscJunk\words5_binary.txt";
+            var seenBitPatterns = new HashSet<int>();
+            using (var reader = new StreamReader(inputFile))
+            using (var writer = new StreamWriter(outputFile))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    if (line != null && line.Length == 5)
+                    {
+                        int bitPattern = 0;
+                        bool validWord = true;
+                        foreach (char c in line)
+                        {
+                            char upperC = char.ToUpper(c);
+                            if (upperC < 'A' || upperC > 'Z')
+                            {
+                                validWord = false;
+                                break;
+                            }
+                            int bitIndex = upperC - 'A';
+                            int bitMask = 1 << (25 - bitIndex);
+                            if ((bitPattern & bitMask) != 0)
+                            {
+                                // Letter already present
+                                validWord = false;
+                                break;
+                            }
+                            bitPattern |= bitMask;
+                        }
+                        if (validWord && !seenBitPatterns.Contains(bitPattern))
+                        {
+                            seenBitPatterns.Add(bitPattern);
+                            writer.WriteLine(Convert.ToString(bitPattern, 2).PadLeft(26, '0') + " - " + line);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void test102()
+        {
+            // Open input file C:\_Dave\NotInfDisk\MiscJunk\words.txt and loop over each line, count the number of letters in each line and if it's 5
+            // then output it to C:\_Dave\NotInfDisk\MiscJunk\words5.txt
+            string inputFile = @"C:\_Dave\NotInfDisk\MiscJunk\words.txt";
+            string outputFile = @"C:\_Dave\NotInfDisk\MiscJunk\words5.txt";
+            int count = 0;
+            using (var reader = new StreamReader(inputFile))
+            using (var writer = new StreamWriter(outputFile))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    if (line != null && line.Length == 5 && line.All(c => (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')))
+                    {
+                        writer.WriteLine(line);
+                        count++;
+                    }
+                }
+            }
+            Console.WriteLine($"Wrote {count} 5-letter words to {outputFile}");
         }
 
         // Maximise a*b + b*c + c*d given a+b+c+d=63
