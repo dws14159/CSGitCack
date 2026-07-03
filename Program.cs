@@ -66,7 +66,7 @@ namespace CSGitCack
             // Console.WriteLine($"This is version [{ver}] of [{thisAssemName.Name}] aka [{thisAssemName.FullName}].");
             try
             {
-                test103();
+                test104();
             }
             catch (Exception e)
             {
@@ -74,6 +74,54 @@ namespace CSGitCack
                 Console.WriteLine("\n\nHit any key to continue");
                 Console.ReadLine();
             }
+        }
+
+        private static void test104()
+        {
+            // A countdown starts at 10:00. Ticks down every second, but every second there's a 1 % chance it swaps
+            // the seconds and minutes value before it ticks down. What's the average expected time before it hits 00:00? 
+
+            var rng = new Random();
+            int numTrials = 10000000;
+            long totalTicks = 0;
+            int minTicks = int.MaxValue;
+            int maxTicks = int.MinValue;
+
+            for (int trial=0; trial<numTrials; trial++)
+            {
+                int minutes = 10;
+                int seconds = 0;
+                int ticks = 0;
+                while (minutes > 0 || seconds > 0)
+                {
+                    ticks++;
+                    if (rng.Next(100) == 0)
+                    {
+                        // Swap
+                        int temp = minutes;
+                        minutes = seconds;
+                        seconds = temp;
+                    }
+                    if (seconds == 0)
+                    {
+                        if (minutes > 0)
+                        {
+                            minutes--;
+                            seconds = 59;
+                        }
+                    }
+                    else
+                    {
+                        seconds--;
+                    }
+                }
+                Console.WriteLine($"Trial {trial} took {ticks} ticks");
+                totalTicks += ticks;
+                if (ticks < minTicks) minTicks = ticks;
+                if (ticks > maxTicks) maxTicks = ticks;
+            }
+            Console.WriteLine($"\nAverage ticks: {totalTicks / (double)numTrials}");
+            Console.WriteLine($"Min ticks={minTicks}, Max ticks={maxTicks}");
         }
 
         private static void test103()
